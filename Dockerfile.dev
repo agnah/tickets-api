@@ -1,0 +1,21 @@
+FROM tiangolo/uvicorn-gunicorn-fastapi:python3.9
+
+# Create destination directory
+RUN mkdir -p /app/tickets-api
+WORKDIR /app/tickets-api
+COPY ./ .
+COPY ./prestart.sh ../
+
+# Update sources
+RUN apt-get update
+
+# Install ssh client and git
+RUN apt-get install openssh-client git -y
+
+# Download public key for github.com
+RUN mkdir -p -m 0600 ~/.ssh && ssh-keyscan github.com >> ~/.ssh/known_hosts
+
+# Install requirements
+RUN --mount=type=ssh apt-get install curl -y && \
+    pip install --upgrade pip && \
+    pip install -r requirements-dev.txt

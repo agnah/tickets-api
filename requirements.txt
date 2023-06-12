@@ -1,0 +1,9 @@
+fastapi[all]==0.79.0
+httpx==0.23.0
+tenacity==8.0.1
+attrs==21.4.0
+cryptography==37.0.4
+SQLAlchemy[asyncio]==1.4.39
+alembic==1.8.1
+asyncmy==0.2.5
+PyMySQL==1.0.2
