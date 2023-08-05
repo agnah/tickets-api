@@ -110,6 +110,7 @@ settings/*
 
 # ignore databases
 *.db
+.ministerio_db/*
 
 # Jetsbrain
 .idea/*
