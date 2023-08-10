@@ -1,11 +1,13 @@
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config, pool
-
 from alembic import context
+from sqlalchemy import engine_from_config, pool
 
 from app.core.config import Settings
 from app.models.base import Base
+from app.models.usuario import Usuario   # noqa
+from app.models.ticket import Ticket, TicketAreaRelation  # noqa
+from app.models.area import Area  # noqa
 
 settings = Settings()
 
