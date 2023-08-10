@@ -117,3 +117,6 @@ settings/*
 # Ignore override files
 
 *.override.json
+
+# Ignore docker-compose files
+docker-compose.yml

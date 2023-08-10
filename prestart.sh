@@ -5,17 +5,11 @@ if [ -z "$TICKETS_API_REPOSITORY_PATH" ]
 then
     if [ -f /app/tickets-api/.env ]
     then
-        # Remove env file set on build instance
+        # Remove the .env file that came with the docker image, if it exists
+        # (i.e running on production)
         echo "Removing .env file on this instance"
         rm /app/tickets-api/.env
     fi
-
-    # if [ -f /var/run/secrets/TICKETS_API_DATABASE_ROUTING_CONFIG ]
-    # then
-    #     # Read the secret value from the file and set it to the same environment variable name
-    #     echo "Setting TICKETS_API_DATABASE_ROUTING_CONFIG from secret"
-    #     export TICKETS_API_DATABASE_ROUTING_CONFIG=$(cat /var/run/secrets/TICKETS_API_DATABASE_ROUTING_CONFIG)
-    # fi
 fi
 
 if [ -z "$TICKETS_API_REPOSITORY_PATH" ]
