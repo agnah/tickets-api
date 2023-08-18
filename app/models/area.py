@@ -11,10 +11,10 @@ class Area(Base):
     __mapper_args__ = {"eager_defaults": True}
 
     id = Column(UnsignedInt, autoincrement=True, primary_key=True)
+
     nombre = Column(Enum(NombreArea), nullable=False)
-    referencia = Column(String(256), nullable=False)
-    numero_gde = Column(UnsignedInt, nullable=False)
 
     fecha_creacion = Column(DateTime, server_default=func.now())
-    fecha_modificacion = Column(DateTime, server_default=func.now(), server_onupdate=func.now())
+    fecha_modificacion = Column(
+        DateTime, server_default=func.now(), server_onupdate=func.now())
     fecha_eliminacion = Column(DateTime, default=None)
