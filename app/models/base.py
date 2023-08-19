@@ -1,8 +1,8 @@
 from collections import defaultdict
 import random
 
-# from sqlalchemy import Integer
-# from sqlalchemy.dialects.mysql import INTEGER
+from sqlalchemy import Integer
+from sqlalchemy.dialects.mysql import INTEGER
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Session, sessionmaker
@@ -78,5 +78,5 @@ def get_database_session(force_leader=False):
 tickets_metadata = MetaData(schema="tickets")
 Base = declarative_base(metadata=tickets_metadata)
 
-# UnsignedInt = Integer()
-# UnsignedInt = UnsignedInt.with_variant(INTEGER(unsigned=True), "mysql")
+UnsignedInt = Integer()
+UnsignedInt = UnsignedInt.with_variant(INTEGER(unsigned=True), "mysql")

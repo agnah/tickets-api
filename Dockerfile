@@ -1,4 +1,4 @@
-FROM tiangolo/uvicorn-gunicorn-fastapi:python3.9
+FROM tiangolo/uvicorn-gunicorn-fastapi:python3.10
 
 # Create destination directory
 RUN mkdir -p /app/tickets-api
@@ -12,4 +12,5 @@ RUN apt-get update && \
     pip install --upgrade pip
 
 # Install requirements
+WORKDIR /app/tickets-api
 RUN pip install -r requirements.txt
