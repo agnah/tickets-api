@@ -1,4 +1,4 @@
-FROM tiangolo/uvicorn-gunicorn-fastapi:python3.9
+FROM tiangolo/uvicorn-gunicorn-fastapi:python3.10
 
 # Create destination directory
 RUN mkdir -p /app/tickets-api
@@ -6,7 +6,7 @@ WORKDIR /app/tickets-api
 COPY ./ .
 COPY ./prestart.sh ../
 
-# Update sources
+# Update sources and install binary requirements
 RUN apt-get update
 
 # Install ssh client and git
