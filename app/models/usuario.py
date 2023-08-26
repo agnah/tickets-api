@@ -16,7 +16,7 @@ class Usuario(Base):
 
     nombre = Column(String(256))
     apellido = Column(String(256))
-    email = Column(String(256))
+    email = Column(String(256), nullable=False)
     celular = Column(String(256), nullable=True)
     telefono = Column(String(256), nullable=True)
     interno = Column(String(256))
