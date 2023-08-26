@@ -20,7 +20,8 @@ class TicketService(ServiceLayer):
             user_id=user_id
         )
 
-        # tickets = [ ticket.__setattr__('demorado',True) for ticket in tickets if(datetime.now() > (ticket.fecha_creacion + timedelta(days=3)))]
+        for ticket in tickets:
+            if datetime.now() > (ticket.fecha_creacion + timedelta(days=3)):
+                ticket.demorado = True
 
-
-        return parse_obj_as(list[TicketSchema], tickets)
+        return parse_obj_as(list[TicketSchema], tickets) if tickets else []
