@@ -13,6 +13,7 @@ class Usuario(Base):
     __mapper_args__ = {"eager_defaults": True}
 
     id = Column(UnsignedInt, autoincrement=True, primary_key=True)
+    token = Column(String(256), nullable=False)
 
     nombre = Column(String(256))
     apellido = Column(String(256))
@@ -32,6 +33,5 @@ class Usuario(Base):
     fecha_modificacion = Column(
         DateTime, server_default=func.now(), server_onupdate=func.now())
     fecha_eliminacion = Column(DateTime, default=None)
-
 
     area = relationship("Area")

@@ -1,9 +1,9 @@
 from sqlalchemy import Boolean, Column, Enum, DateTime, ForeignKey, String, Text
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
+
 from app.schemas.area import EPreTareas
 from app.schemas.tarea import EEstadoTarea
-
 from app.schemas.ticket import PrioridadTicket, EstadoTicket
 
 
@@ -57,7 +57,7 @@ class TicketTareaRelacion(Base):
 
     tecnico_id = Column(UnsignedInt, ForeignKey("usuario.id"), nullable=False)
 
-    estado = Column(Enum(EEstadoTarea), nullable=False, default=EEstadoTarea.ACTIVA)
+    estado = Column(Enum(EstadoTicket), nullable=False, default=EEstadoTarea.ACTIVA)
 
     fecha_creacion = Column(DateTime, server_default=func.now())
     fecha_modificacion = Column(
@@ -66,6 +66,7 @@ class TicketTareaRelacion(Base):
 
     ticket = relationship("Ticket")
     area = relationship("Area")
+    tecnico = relationship("Usuario")
 
 
 class TicketHistorial(Base):
@@ -87,3 +88,7 @@ class TicketHistorial(Base):
     fecha_creacion = Column(DateTime, server_default=func.now())
     fecha_modificacion = Column(
         DateTime, server_default=func.now(), server_onupdate=func.now())
+
+    ticket = relationship("Ticket")
+    area_anterior = relationship("Area", foreign_keys=[area_anterior_id])
+    tecnico_anterior = relationship("Usuario", foreign_keys=[tecnico_anterior_id])
