@@ -37,17 +37,19 @@ class TicketRepository(BaseRepository):
         return tickets
 
     async def get_tickets_by_field_in_date_range(
-        self, field: ETicketField, value: str,
+        self,
+        field: ETicketField = None, value: str = None,
         start_date: datetime = None, end_date: datetime = None
     ):
-        column: InstrumentedAttribute = getattr(Ticket, field, Ticket.id)
 
         query = select(Ticket).where(
-            column == value,
             Ticket.fecha_eliminacion.is_(None),
         )
 
-        if start_date:
+        if field and value:
+            column: InstrumentedAttribute = getattr(Ticket, field)
+            query = query.where(column == value)
+        elif start_date:
             query = query.where(Ticket.fecha_creacion >= start_date)
         elif end_date:
             query = query.where(Ticket.fecha_creacion <= end_date)

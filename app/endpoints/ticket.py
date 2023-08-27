@@ -34,8 +34,8 @@ async def get_last_months_tickets_by_user(
 
 @router.get("/")
 async def get_tickets_by_field(
-    field: str,
-    value: str,
+    field: str = None,
+    value: str = None,
     start_date: datetime = None,
     end_date: datetime = None,
     tickets_service: TicketService = Depends(get_ticket_service)

@@ -28,10 +28,10 @@ class TicketService(ServiceLayer):
 
     async def get_tickets_by_field_in_date_range(
         self,
-        field: ETicketField,
-        value: str,
-        start_date=datetime,
-        end_date=datetime
+        field: ETicketField = None,
+        value: str = None,
+        start_date: datetime = None,
+        end_date: datetime = None
     ):
 
         repo = TicketRepository(db=self.db)
