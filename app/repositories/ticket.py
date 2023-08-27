@@ -4,11 +4,13 @@ from typing import Optional
 from attr import define
 
 from sqlalchemy import select
+from sqlalchemy.orm import InstrumentedAttribute, joinedload
+
 from app.models.ticket import Ticket
 
 from app.repositories.base import BaseRepository
 
-from app.schemas.ticket import TicketSchema
+from app.schemas.ticket import ETicketField, TicketSchema
 
 
 @define
@@ -31,5 +33,25 @@ class TicketRepository(BaseRepository):
                     Ticket.fecha_eliminacion.is_(None))
             )
         ).scalars().all()
+
+        return tickets
+
+    async def get_tickets_by_field_in_date_range(
+        self, field: ETicketField, value: str,
+        start_date: datetime = None, end_date: datetime = None
+    ):
+        column: InstrumentedAttribute = getattr(Ticket, field, Ticket.id)
+
+        query = select(Ticket).where(
+            column == value,
+            Ticket.fecha_eliminacion.is_(None),
+        )
+
+        if start_date:
+            query = query.where(Ticket.fecha_creacion >= start_date)
+        elif end_date:
+            query = query.where(Ticket.fecha_creacion <= end_date)
+
+        tickets: list[TicketSchema] = (await self.db.execute(query)).scalars().all()
 
         return tickets

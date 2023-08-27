@@ -1,3 +1,4 @@
+from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Header, status
 from pydantic import Required
 
@@ -10,14 +11,14 @@ from app.services.usuario import UsuarioService
 router = APIRouter()
 
 
-@router.get("/")
-async def get_last_months_tickets_by_user_id(
+@router.get("/inicio/")
+async def get_last_months_tickets_by_user(
     token: str = Header(Required, alias="X-Token"),
     usuario_service: UsuarioService = Depends(get_usuario_service),
     tickets_service: TicketService = Depends(get_ticket_service)
 ) -> list[TicketSchema]:
 
-    user = await usuario_service.get_user_by_field(field=EUSerField.TOKEN,value=token)
+    user = await usuario_service.get_user_by_field(field=EUSerField.TOKEN, value=token)
 
     if not user:
         raise HTTPException(
@@ -28,4 +29,23 @@ async def get_last_months_tickets_by_user_id(
     tickets = await tickets_service.get_last_months_tickets_by_user(
         user_id=user.id
     )
+    return tickets
+
+
+@router.get("/")
+async def get_tickets_by_field(
+    field: str,
+    value: str,
+    start_date: datetime = None,
+    end_date: datetime = None,
+    tickets_service: TicketService = Depends(get_ticket_service)
+) -> list[TicketSchema]:
+
+    tickets = await tickets_service.get_tickets_by_field_in_date_range(
+        field=field,
+        value=value,
+        start_date=start_date,
+        end_date=end_date
+    )
+
     return tickets

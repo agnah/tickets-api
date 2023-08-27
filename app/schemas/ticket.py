@@ -5,6 +5,18 @@ from enum import Enum
 from pydantic import BaseModel
 
 
+class ETicketField(str, Enum):
+    ID = "id"
+
+    EMAIL_SOLICITANTE = "email_solicitante"
+
+    AREA_ASIGNADA_ID = "area_asignada_id"
+    TECNICO_ASIGNADO_ID = "tecnico_asignado_id"
+
+    PRIORIDAD = "prioridad"
+    ESTADO = "estado"
+
+
 class PrioridadTicket(str, Enum):
     ALTA = "alta"
     BAJA = "baja"
