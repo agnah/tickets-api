@@ -1,5 +1,7 @@
 from enum import Enum
 
+from pydantic import BaseModel, EmailStr
+
 
 class PerfilUsuario(str, Enum):
     SOLICITANTE = "solicitante"
@@ -12,3 +14,8 @@ class RolUsuario(str, Enum):
     ADMINISTRADOR = "administrador"
     EDITOR = "editor"
     LECTOR = "lector"
+
+
+class UserLoginSchema(BaseModel):
+    email: EmailStr
+    password: str
