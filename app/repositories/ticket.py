@@ -54,6 +54,10 @@ class TicketRepository(BaseRepository):
         elif end_date:
             query = query.where(Ticket.fecha_creacion <= end_date)
 
+        if not (start_date or end_date):
+            query = query.where(Ticket.fecha_creacion >=
+                                datetime.now() - timedelta(days=30))
+
         tickets: list[TicketSchema] = (await self.db.execute(query)).scalars().all()
 
         return tickets
