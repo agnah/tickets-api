@@ -4,6 +4,8 @@ from enum import Enum
 
 from pydantic import BaseModel
 
+from app.schemas.area import EPreTareas
+
 
 class ETicketField(str, Enum):
     ID = "id"
@@ -30,16 +32,42 @@ class EstadoTicket(str, Enum):
     ANULADO = "anulado"
 
 
+class CreateTicketPayload(BaseModel):
+    email_solicitante: str
+    nombre_solicitante: str = None
+    apellido_solicitante: str = None
+    telefono_solicitante: str = None
+    celular_solicitante: str = None
+    area_solicitante: int = None
+    piso_solicitante: str = None
+
+    referencia: str
+    area_asignada_id: int
+    tecnico_asignado_id: int
+
+    prioridad: PrioridadTicket
+    estado: EstadoTicket
+
+    descripcion: str
+
+    pre_tarea: EPreTareas
+
+    archivos: str = None
+
+    class Config:
+        orm_mode = True
+
+
 class TicketSchema(BaseModel):
     id: int
 
     email_solicitante: str
-    nombre_solicitante: str
-    apellido_solicitante: str
-    telefono_solicitante: str
-    celular_solicitante: str
-    area_solicitante: int
-    piso_solicitante: str
+    nombre_solicitante: str = None
+    apellido_solicitante: str = None
+    telefono_solicitante: str = None
+    celular_solicitante: str = None
+    area_solicitante: int = None
+    piso_solicitante: str = None
 
     referencia: str
     area_asignada_id: int
@@ -52,7 +80,7 @@ class TicketSchema(BaseModel):
 
     pre_tarea: str
 
-    archivos: str
+    archivos: str = None
 
     fecha_creacion: datetime
     fecha_modificacion: datetime

@@ -13,6 +13,8 @@ class RoutingDatabaseSettings(BaseModel):
 
 class Settings(BaseSettings):
     SERVICE_NAME: str = "tickets-api"
+
+    # Tickets Database settings
     TICKETS_API_DATABASE_URL: str
     TICKETS_API_ECHO_QUERIES: bool = False
     TICKETS_API_DATABASE_ROUTING_CONFIG: Optional[RoutingDatabaseSettings] = None

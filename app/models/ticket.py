@@ -16,7 +16,7 @@ class Ticket(Base):
 
     id = Column(UnsignedInt, autoincrement=True, primary_key=True)
 
-    email_solicitante = Column(String(256), nullable=True)
+    email_solicitante = Column(String(256), nullable=False)
     nombre_solicitante = Column(String(256), nullable=True)
     apellido_solicitante = Column(String(256), nullable=True)
     telefono_solicitante = Column(String(256), nullable=True)

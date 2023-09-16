@@ -10,7 +10,7 @@ from app.models.ticket import Ticket
 
 from app.repositories.base import BaseRepository
 
-from app.schemas.ticket import ETicketField, TicketSchema
+from app.schemas.ticket import CreateTicketPayload, ETicketField, TicketSchema
 
 
 @define
@@ -61,3 +61,13 @@ class TicketRepository(BaseRepository):
         tickets: list[TicketSchema] = (await self.db.execute(query)).scalars().all()
 
         return tickets
+
+    async def create_new_ticket(
+        self, payload: CreateTicketPayload
+    ) -> TicketSchema:
+
+        new_ticket = Ticket(**payload.dict())
+        self.db.add(new_ticket)
+        await self.db.commit()
+
+        return new_ticket

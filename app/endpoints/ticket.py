@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, Header, status
 from pydantic import Required
 
 from app.dependencies.service import get_ticket_service, get_usuario_service
-from app.schemas.ticket import TicketSchema
+from app.schemas.ticket import CreateTicketPayload, TicketSchema
 from app.schemas.usuario import EUSerField
 from app.services.ticket import TicketService
 from app.services.usuario import UsuarioService
@@ -49,3 +49,14 @@ async def get_tickets_by_field(
     )
 
     return tickets
+
+@router.post("/")
+async def create_new_ticket(
+    payload: CreateTicketPayload,
+    ticket_service: TicketService = Depends(get_ticket_service)
+):
+    ticket = await ticket_service.create_new_ticket(
+        payload=payload
+    )
+
+    return ticket
