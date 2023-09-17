@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, Header, status
 from pydantic import Required
 
 from app.dependencies.service import get_ticket_service, get_usuario_service
-from app.schemas.ticket import CreateTicketPayload, TicketSchema
+from app.schemas.ticket import CreateTicketPayload, EstadoTicket, TicketSchema
 from app.schemas.usuario import EUSerField
 from app.services.ticket import TicketService
 from app.services.usuario import UsuarioService
@@ -50,6 +50,7 @@ async def get_tickets_by_field(
 
     return tickets
 
+
 @router.post("/")
 async def create_new_ticket(
     payload: CreateTicketPayload,
@@ -58,5 +59,100 @@ async def create_new_ticket(
     ticket = await ticket_service.create_new_ticket(
         payload=payload
     )
+
+    return ticket
+
+
+@router.delete("/{ticket_id}/")
+async def anular_ticket(
+    ticket_id: int,
+    usuario_id: int = Header(Required, alias="X-Usuario"),
+    ticket_service: TicketService = Depends(get_ticket_service),
+    usuario_service: UsuarioService = Depends(get_usuario_service),
+):
+    usuario = await usuario_service.get_user_by_field(
+        field=EUSerField.ID, value=usuario_id)
+    if not usuario:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"error": "Usuario no encontrado"},
+        )
+    if usuario.rol not in ["administrador", "editor"]:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail={"error": "Usuario no autorizado"},
+        )
+
+    ticket = await ticket_service.anular_ticket(
+        ticket_id=ticket_id
+    )
+    if not ticket:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"error": "Ticket no encontrado"},
+        )
+
+    return ticket
+
+
+@router.patch("/{ticket_id}/")
+async def cerrar_ticket(
+    ticket_id: int,
+    usuario_id: int = Header(Required, alias="X-Usuario"),
+    ticket_service: TicketService = Depends(get_ticket_service),
+    usuario_service: UsuarioService = Depends(get_usuario_service),
+):
+    usuario = await usuario_service.get_user_by_field(
+        field=EUSerField.ID, value=usuario_id)
+    if not usuario:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"error": "Usuario no encontrado"},
+        )
+    if usuario.rol not in ["administrador", "editor"]:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail={"error": "Usuario no autorizado"},
+        )
+
+    ticket = await ticket_service.actualizar_estado_ticket(ticket_id=ticket_id, estado=EstadoTicket.ANULADO)
+    if not ticket:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"error": "Ticket no encontrado"},
+        )
+
+    return ticket
+
+
+@router.patch("/derivaciones/{ticket_id}/")
+async def derivar_ticket(
+    ticket_id: int,
+    area_id: int,
+    usuario_id: int = Header(Required, alias="X-Usuario"),
+    ticket_service: TicketService = Depends(get_ticket_service),
+    usuario_service: UsuarioService = Depends(get_usuario_service),
+):
+    usuario = await usuario_service.get_user_by_field(
+        field=EUSerField.ID, value=usuario_id)
+    if not usuario:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"error": "Usuario no encontrado"},
+        )
+    if usuario.rol not in ["administrador", "editor"]:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail={"error": "Usuario no autorizado"},
+        )
+
+    ticket = await ticket_service.derivar_ticket(
+        ticket_id=ticket_id, area_id=area_id
+    )
+    if not ticket:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"error": "Ticket no encontrado"},
+        )
 
     return ticket

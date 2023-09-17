@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from pydantic import parse_obj_as
 
 from app.repositories.ticket import TicketRepository
-from app.schemas.ticket import CreateTicketPayload, ETicketField, TicketSchema
+from app.schemas.ticket import CreateTicketPayload, ETicketField, EstadoTicket, TicketSchema
 from .layer import register_service, ServiceLayer
 
 
@@ -51,5 +51,41 @@ class TicketService(ServiceLayer):
         area_solicitante = await area_service.get_area_by_id(payload.area_solicitante)
 
         ticket = await ticket_repo.create_new_ticket(payload=payload)
+
+        return parse_obj_as(TicketSchema, ticket) if ticket else None
+
+    async def get_ticket_by_id(self, ticket_id: int):
+
+        repo = TicketRepository(db=self.db)
+        ticket = await repo.get_ticket_by_id(ticket_id=ticket_id)
+
+        return parse_obj_as(TicketSchema, ticket) if ticket else None
+
+    async def anular_ticket(self, ticket_id: int):
+
+        repo = TicketRepository(db=self.db)
+        ticket = await repo.anular_ticket_by_id(ticket_id=ticket_id)
+
+        return parse_obj_as(TicketSchema, ticket) if ticket else None
+
+    async def actualizar_estado_ticket(self, ticket_id: int, estado: EstadoTicket):
+
+        repo = TicketRepository(db=self.db)
+
+        # TBD: Deberiamos llamar a método para almacenar historial
+
+        ticket = await repo.actualizar_estado_ticket(ticket_id=ticket_id, estado=estado)
+
+        return parse_obj_as(TicketSchema, ticket) if ticket else None
+
+    async def derivar_ticket(
+        self, ticket_id: int, area_id: int
+    ):
+
+        repo = TicketRepository(db=self.db)
+
+        # TBD: Deberiamos llamar a método para almacenar historial
+
+        ticket = await repo.derivar_ticket(ticket_id=ticket_id, area_id=area_id)
 
         return parse_obj_as(TicketSchema, ticket) if ticket else None

@@ -10,7 +10,7 @@ from app.models.ticket import Ticket
 
 from app.repositories.base import BaseRepository
 
-from app.schemas.ticket import CreateTicketPayload, ETicketField, TicketSchema
+from app.schemas.ticket import CreateTicketPayload, ETicketField, EstadoTicket, TicketSchema
 
 
 @define
@@ -71,3 +71,82 @@ class TicketRepository(BaseRepository):
         await self.db.commit()
 
         return new_ticket
+
+    async def get_ticket_by_id(self, ticket_id: int) -> TicketSchema:
+
+        ticket: TicketSchema = (
+            await self.db.execute(
+                select(Ticket)
+                .where(
+                    Ticket.id == ticket_id,
+                    Ticket.fecha_eliminacion.is_(None)
+                )
+            )
+        ).scalar_one_or_none()
+
+        return ticket
+
+    async def anular_ticket_by_id(self, ticket_id: int) -> TicketSchema:
+
+        ticket: TicketSchema = (
+            await self.db.execute(
+                select(Ticket)
+                .where(
+                    Ticket.id == ticket_id,
+                    Ticket.fecha_eliminacion.is_(None)
+                )
+            )
+        ).scalar_one_or_none()
+
+        if ticket:
+            ticket.estado = "anulado"
+            ticket.fecha_eliminacion = datetime.now()
+
+            await self.db.commit()
+
+        return ticket
+
+    async def actualizar_estado_ticket(
+        self, ticket_id: int, estado: EstadoTicket
+    ) -> TicketSchema:
+
+        ticket: TicketSchema = (
+            await self.db.execute(
+                select(Ticket)
+                .where(
+                    Ticket.id == ticket_id,
+                    Ticket.fecha_eliminacion.is_(None)
+                )
+            )
+        ).scalar_one_or_none()
+
+        if ticket:
+            ticket.estado = estado
+            if estado == EstadoTicket.FINALIZADO:
+                ticket.fecha_eliminacion = datetime.now()
+
+            await self.db.commit()
+
+        return ticket
+
+    async def derivar_ticket(
+        self, ticket_id: int, area_id: int
+    ) -> TicketSchema:
+
+        ticket: TicketSchema = (
+            await self.db.execute(
+                select(Ticket)
+                .where(
+                    Ticket.id == ticket_id,
+                    Ticket.fecha_eliminacion.is_(None)
+                )
+            )
+        ).scalar_one_or_none()
+
+        if ticket:
+            ticket.area_asignada_id = area_id
+            ticket.estado = EstadoTicket.DERIVADO
+
+            await self.db.commit()
+
+        return ticket
