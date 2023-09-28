@@ -22,7 +22,7 @@ class Ticket(Base):
     telefono_solicitante = Column(String(256), nullable=True)
     celular_solicitante = Column(String(256), nullable=True)
     area_solicitante = Column(UnsignedInt, ForeignKey("area.id"), nullable=True)
-    sede_solicitante = Column(String(256), nullable=True)
+    # sede_solicitante = Column(Enum(ESede))  # TODO: Completar una vez que nos pasen los datos
     piso_solicitante = Column(String(256), nullable=True)
 
     referencia = Column(String(256), nullable=True)
