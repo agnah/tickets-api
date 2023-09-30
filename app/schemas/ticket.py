@@ -18,6 +18,13 @@ class ETicketField(str, Enum):
     PRIORIDAD = "prioridad"
     ESTADO = "estado"
 
+class ESede(str, Enum):
+    BUENOS_AIRES = "buenos_aires"
+    CORDOBA = "cordoba"
+    MENDOZA = "mendoza"
+    ROSARIO = "rosario"
+    TUCUMAN = "tucuman"
+
 
 class PrioridadTicket(str, Enum):
     ALTA = "alta"
@@ -57,6 +64,27 @@ class CreateTicketPayload(BaseModel):
     class Config:
         orm_mode = True
 
+class AddTareaTicketPayload(BaseModel):
+    ticket_id: int
+    tarea_id: int
+    tecnico_id: int
+
+    class Config:
+        orm_mode = True
+
+class TicketTareaSchema(BaseModel):
+    id: int
+    ticket_id: int
+    tarea_id: int
+    tecnico_id: int
+    estado: str
+
+    fecha_creacion: datetime
+    fecha_modificacion: datetime
+    fecha_eliminacion: datetime = None
+
+    class Config:
+        orm_mode = True
 
 class TicketSchema(BaseModel):
     id: int

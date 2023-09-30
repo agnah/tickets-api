@@ -2,7 +2,8 @@ from datetime import datetime, timedelta
 from pydantic import parse_obj_as
 
 from app.repositories.ticket import TicketRepository
-from app.schemas.ticket import CreateTicketPayload, ETicketField, EstadoTicket, TicketSchema
+from app.schemas.area import TareaAreaSchema
+from app.schemas.ticket import AddTareaTicketPayload, CreateTicketPayload, ETicketField, EstadoTicket, TicketSchema, TicketTareaSchema
 from .layer import register_service, ServiceLayer
 
 
@@ -89,3 +90,35 @@ class TicketService(ServiceLayer):
         ticket = await repo.derivar_ticket(ticket_id=ticket_id, area_id=area_id)
 
         return parse_obj_as(TicketSchema, ticket) if ticket else None
+
+    async def agregar_tarea(
+        self, ticket: TicketSchema, tarea: TareaAreaSchema
+    ):
+
+        repo = TicketRepository(db=self.db)
+
+        # TBD: Deberiamos llamar a método para almacenar historial
+        payload = AddTareaTicketPayload(
+            ticket_id=ticket.id,
+            tarea_id=tarea.id,
+            tecnico_id=ticket.tecnico_asignado_id
+        )
+
+        ticket_tarea_relacion = await repo.agregar_tarea(
+            payload=payload
+        )
+
+        return parse_obj_as(TicketTareaSchema, ticket_tarea_relacion) if ticket_tarea_relacion else None
+
+    async def finalizar_tarea(
+        self, ticket_id: int, tarea_id: int
+    ):
+
+        repo = TicketRepository(db=self.db)
+
+        # TBD: Deberiamos llamar a método para almacenar historial
+        ticket_tarea_relacion = await repo.finalizar_tarea(
+            ticket_id=ticket_id, tarea_id=tarea_id
+        )
+
+        return parse_obj_as(TicketTareaSchema, ticket_tarea_relacion) if ticket_tarea_relacion else None

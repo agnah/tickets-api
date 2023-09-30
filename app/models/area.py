@@ -1,4 +1,5 @@
-from sqlalchemy import Column, Enum, String, func, DateTime
+from sqlalchemy import Column, Enum, String, func, DateTime, ForeignKey
+from sqlalchemy.orm import relationship
 
 from app.schemas.area import NombreArea
 
@@ -18,3 +19,19 @@ class Area(Base):
     fecha_modificacion = Column(
         DateTime, server_default=func.now(), server_onupdate=func.now())
     fecha_eliminacion = Column(DateTime, default=None)
+
+
+class TareaAreaRelacion(Base):
+    __tablename__ = "tarea_area_relacion"
+    __mapper_args__ = {"eager_defaults": True}
+
+    id = Column(UnsignedInt, autoincrement=True, primary_key=True)
+    tarea = Column(String(256), nullable=False)
+    area_id = Column(UnsignedInt, ForeignKey("area.id"), nullable=False)
+
+    fecha_creacion = Column(DateTime, server_default=func.now())
+    fecha_modificacion = Column(
+        DateTime, server_default=func.now(), server_onupdate=func.now())
+    fecha_eliminacion = Column(DateTime, default=None)
+
+    area = relationship("Area")

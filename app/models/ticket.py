@@ -1,10 +1,10 @@
-from sqlalchemy import Boolean, Column, Enum, DateTime, ForeignKey, String, Text
+from sqlalchemy import Column, Enum, DateTime, ForeignKey, String, Text
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 from app.schemas.area import EPreTareas
 from app.schemas.tarea import EEstadoTarea
-from app.schemas.ticket import PrioridadTicket, EstadoTicket
+from app.schemas.ticket import ESede, PrioridadTicket, EstadoTicket
 
 
 from .base import Base, UnsignedInt
@@ -22,7 +22,8 @@ class Ticket(Base):
     telefono_solicitante = Column(String(256), nullable=True)
     celular_solicitante = Column(String(256), nullable=True)
     area_solicitante = Column(UnsignedInt, ForeignKey("area.id"), nullable=True)
-    # sede_solicitante = Column(Enum(ESede))  # TODO: Completar una vez que nos pasen los datos
+    # TODO: Completar una vez que nos pasen los datos
+    sede_solicitante = Column(Enum(ESede), nullable=False, default=ESede.BUENOS_AIRES)
     piso_solicitante = Column(String(256), nullable=True)
 
     referencia = Column(String(256), nullable=True)
@@ -51,13 +52,11 @@ class TicketTareaRelacion(Base):
 
     id = Column(UnsignedInt, autoincrement=True, primary_key=True)
     ticket_id = Column(UnsignedInt, ForeignKey("ticket.id"), nullable=False)
-    area_id = Column(UnsignedInt, ForeignKey("area.id"), nullable=False)
-
-    tarea = Column(Enum(EPreTareas), nullable=False)
+    tarea_id = Column(UnsignedInt, ForeignKey("tarea_area_relacion.id"), nullable=False)
 
     tecnico_id = Column(UnsignedInt, ForeignKey("usuario.id"), nullable=False)
 
-    estado = Column(Enum(EstadoTicket), nullable=False, default=EEstadoTarea.ACTIVA)
+    estado = Column(Enum(EEstadoTarea), nullable=False, default=EEstadoTarea.ACTIVA)
 
     fecha_creacion = Column(DateTime, server_default=func.now())
     fecha_modificacion = Column(
@@ -65,7 +64,6 @@ class TicketTareaRelacion(Base):
     fecha_eliminacion = Column(DateTime, default=None)
 
     ticket = relationship("Ticket")
-    area = relationship("Area")
     tecnico = relationship("Usuario")
 
 

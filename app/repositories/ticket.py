@@ -6,11 +6,12 @@ from attr import define
 from sqlalchemy import select
 from sqlalchemy.orm import InstrumentedAttribute, joinedload
 
-from app.models.ticket import Ticket
+from app.models.ticket import Ticket, TicketTareaRelacion
 
 from app.repositories.base import BaseRepository
+from app.schemas.tarea import EEstadoTarea
 
-from app.schemas.ticket import CreateTicketPayload, ETicketField, EstadoTicket, TicketSchema
+from app.schemas.ticket import AddTareaTicketPayload, CreateTicketPayload, ETicketField, EstadoTicket, TicketSchema, TicketTareaSchema
 
 
 @define
@@ -23,7 +24,7 @@ class TicketRepository(BaseRepository):
         self, user_id: int
     ) -> list[TicketSchema]:
 
-        tickets: Optional[TicketSchema] = (
+        tickets: list[TicketSchema] = (
             await self.db.execute(
                 select(Ticket)
                 .where(
@@ -40,7 +41,7 @@ class TicketRepository(BaseRepository):
         self,
         field: ETicketField = None, value: str = None,
         start_date: datetime = None, end_date: datetime = None
-    ):
+    ) -> list[TicketSchema]:
 
         query = select(Ticket).where(
             Ticket.fecha_eliminacion.is_(None),
@@ -150,3 +151,36 @@ class TicketRepository(BaseRepository):
             await self.db.commit()
 
         return ticket
+
+    async def agregar_tarea(
+        self, payload: AddTareaTicketPayload
+    ) -> TicketTareaSchema:
+
+        ticket_tarea = TicketTareaRelacion(**payload.dict())
+        self.db.add(ticket_tarea)
+        await self.db.commit()
+
+        return ticket_tarea
+
+    async def finalizar_tarea(
+        self, ticket_id: int, tarea_id: int
+    ) -> TicketTareaSchema:
+
+        ticket_tarea: TicketTareaSchema = (
+            await self.db.execute(
+                select(TicketTareaRelacion)
+                .where(
+                    TicketTareaRelacion.ticket_id == ticket_id,
+                    TicketTareaRelacion.tarea_id == tarea_id,
+                    TicketTareaRelacion.fecha_eliminacion.is_(None)
+                )
+            )
+        ).scalar_one_or_none()
+
+        if ticket_tarea:
+            ticket_tarea.estado = EEstadoTarea.FINALIZADA
+            ticket_tarea.fecha_eliminacion = datetime.now()
+
+            await self.db.commit()
+
+        return ticket_tarea

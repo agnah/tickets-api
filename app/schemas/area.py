@@ -32,3 +32,15 @@ class AreaSchema(BaseModel):
 
     class Config:
         orm_mode = True
+
+class TareaAreaSchema(BaseModel):
+    id: int
+    tarea: str
+    area_id: int
+
+    fecha_creacion: datetime
+    fecha_modificacion: datetime
+    fecha_eliminacion: datetime = None
+
+    class Config:
+        orm_mode = True

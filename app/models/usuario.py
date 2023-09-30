@@ -1,6 +1,7 @@
 from sqlalchemy import Boolean, Column, Enum, DateTime, ForeignKey, String, Text
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
+from app.schemas.ticket import ESede
 
 from app.schemas.usuario import PerfilUsuario, RolUsuario
 
@@ -23,7 +24,7 @@ class Usuario(Base):
     interno = Column(String(256))
 
     area_id = Column(UnsignedInt, ForeignKey("area.id"))
-    # sede = Column(Enum(ESede)) # TODO: Completar una vez que nos pasen los datos
+    sede = Column(Enum(ESede), nullable=False, default=ESede.BUENOS_AIRES) # TODO: Completar una vez que nos pasen los datos
     piso = Column(String(256), nullable=True)
 
     perfil = Column(Enum(PerfilUsuario))

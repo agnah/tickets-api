@@ -1,8 +1,8 @@
 """Initial migration
 
-Revision ID: 06885c5f2787
+Revision ID: 385b01c967a5
 Revises: 
-Create Date: 2023-08-18 09:59:52.402993
+Create Date: 2023-09-24 19:08:14.174656
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 
 # revision identifiers, used by Alembic.
-revision = '06885c5f2787'
+revision = '385b01c967a5'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -27,15 +27,28 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id'),
     schema='tickets'
     )
+    op.create_table('tarea_area_relacion',
+    sa.Column('id', sa.Integer().with_variant(mysql.INTEGER(unsigned=True), 'mysql'), autoincrement=True, nullable=False),
+    sa.Column('tarea', sa.String(length=256), nullable=False),
+    sa.Column('area_id', sa.Integer().with_variant(mysql.INTEGER(unsigned=True), 'mysql'), nullable=False),
+    sa.Column('fecha_creacion', sa.DateTime(), server_default=sa.text('now()'), nullable=True),
+    sa.Column('fecha_modificacion', sa.DateTime(), server_default=sa.text('now()'), nullable=True),
+    sa.Column('fecha_eliminacion', sa.DateTime(), nullable=True),
+    sa.ForeignKeyConstraint(['area_id'], ['tickets.area.id'], ),
+    sa.PrimaryKeyConstraint('id'),
+    schema='tickets'
+    )
     op.create_table('usuario',
     sa.Column('id', sa.Integer().with_variant(mysql.INTEGER(unsigned=True), 'mysql'), autoincrement=True, nullable=False),
+    sa.Column('token', sa.String(length=256), nullable=False),
     sa.Column('nombre', sa.String(length=256), nullable=True),
     sa.Column('apellido', sa.String(length=256), nullable=True),
-    sa.Column('email', sa.String(length=256), nullable=True),
+    sa.Column('email', sa.String(length=256), nullable=False),
     sa.Column('celular', sa.String(length=256), nullable=True),
     sa.Column('telefono', sa.String(length=256), nullable=True),
     sa.Column('interno', sa.String(length=256), nullable=True),
     sa.Column('area_id', sa.Integer().with_variant(mysql.INTEGER(unsigned=True), 'mysql'), nullable=True),
+    sa.Column('sede', sa.Enum('BUENOS_AIRES', 'CORDOBA', 'MENDOZA', 'ROSARIO', 'TUCUMAN', name='esede'), nullable=False),
     sa.Column('piso', sa.String(length=256), nullable=True),
     sa.Column('perfil', sa.Enum('SOLICITANTE', 'RESPONSABLE_DE_AREA', 'COLABORADOR', 'OPERADOR', name='perfilusuario'), nullable=True),
     sa.Column('rol', sa.Enum('ADMINISTRADOR', 'EDITOR', 'LECTOR', name='rolusuario'), nullable=True),
@@ -48,13 +61,13 @@ def upgrade() -> None:
     )
     op.create_table('ticket',
     sa.Column('id', sa.Integer().with_variant(mysql.INTEGER(unsigned=True), 'mysql'), autoincrement=True, nullable=False),
-    sa.Column('email_solicitante', sa.String(length=256), nullable=True),
+    sa.Column('email_solicitante', sa.String(length=256), nullable=False),
     sa.Column('nombre_solicitante', sa.String(length=256), nullable=True),
     sa.Column('apellido_solicitante', sa.String(length=256), nullable=True),
     sa.Column('telefono_solicitante', sa.String(length=256), nullable=True),
     sa.Column('celular_solicitante', sa.String(length=256), nullable=True),
     sa.Column('area_solicitante', sa.Integer().with_variant(mysql.INTEGER(unsigned=True), 'mysql'), nullable=True),
-    sa.Column('sede_solicitante', sa.String(length=256), nullable=True),
+    sa.Column('sede_solicitante', sa.Enum('BUENOS_AIRES', 'CORDOBA', 'MENDOZA', 'ROSARIO', 'TUCUMAN', name='esede'), nullable=False),
     sa.Column('piso_solicitante', sa.String(length=256), nullable=True),
     sa.Column('referencia', sa.String(length=256), nullable=True),
     sa.Column('area_asignada_id', sa.Integer().with_variant(mysql.INTEGER(unsigned=True), 'mysql'), nullable=False),
@@ -94,14 +107,13 @@ def upgrade() -> None:
     op.create_table('ticket_tarea_relacion',
     sa.Column('id', sa.Integer().with_variant(mysql.INTEGER(unsigned=True), 'mysql'), autoincrement=True, nullable=False),
     sa.Column('ticket_id', sa.Integer().with_variant(mysql.INTEGER(unsigned=True), 'mysql'), nullable=False),
-    sa.Column('area_id', sa.Integer().with_variant(mysql.INTEGER(unsigned=True), 'mysql'), nullable=False),
-    sa.Column('tarea', sa.Enum('TAREA1', 'TAREA2', 'TAREA3', name='epretareas'), nullable=False),
+    sa.Column('tarea_id', sa.Integer().with_variant(mysql.INTEGER(unsigned=True), 'mysql'), nullable=False),
     sa.Column('tecnico_id', sa.Integer().with_variant(mysql.INTEGER(unsigned=True), 'mysql'), nullable=False),
     sa.Column('estado', sa.Enum('ACTIVA', 'FINALIZADA', name='eestadotarea'), nullable=False),
     sa.Column('fecha_creacion', sa.DateTime(), server_default=sa.text('now()'), nullable=True),
     sa.Column('fecha_modificacion', sa.DateTime(), server_default=sa.text('now()'), nullable=True),
     sa.Column('fecha_eliminacion', sa.DateTime(), nullable=True),
-    sa.ForeignKeyConstraint(['area_id'], ['tickets.area.id'], ),
+    sa.ForeignKeyConstraint(['tarea_id'], ['tickets.tarea_area_relacion.id'], ),
     sa.ForeignKeyConstraint(['tecnico_id'], ['tickets.usuario.id'], ),
     sa.ForeignKeyConstraint(['ticket_id'], ['tickets.ticket.id'], ),
     sa.PrimaryKeyConstraint('id'),
@@ -116,5 +128,6 @@ def downgrade() -> None:
     op.drop_table('ticket_historial', schema='tickets')
     op.drop_table('ticket', schema='tickets')
     op.drop_table('usuario', schema='tickets')
+    op.drop_table('tarea_area_relacion', schema='tickets')
     op.drop_table('area', schema='tickets')
     # ### end Alembic commands ###

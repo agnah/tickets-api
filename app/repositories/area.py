@@ -3,11 +3,11 @@ from attr import define
 
 from sqlalchemy import select
 from sqlalchemy.orm import InstrumentedAttribute, joinedload
-from app.models.area import Area
+from app.models.area import Area, TareaAreaRelacion
 
 
 from app.repositories.base import BaseRepository
-from app.schemas.area import AreaSchema
+from app.schemas.area import AreaSchema, TareaAreaSchema
 
 
 @define
@@ -18,9 +18,9 @@ class AreaRepository(BaseRepository):
 
     async def get_area_by_id(
         self, area_id: int
-    ) -> Optional[AreaSchema]:
+    ):
 
-        area: Optional[AreaSchema] = (
+        area: Optional[Area] = (
             await self.db.execute(
                 select(Area)
                 .where(
@@ -30,3 +30,19 @@ class AreaRepository(BaseRepository):
         ).scalar_one_or_none()
 
         return area
+
+    async def get_all_tareas_by_area_id(
+        self, area_id: int
+    ):
+
+        tareas: list[TareaAreaRelacion] = (
+            await self.db.execute(
+                select(TareaAreaRelacion)
+                .where(
+                    Area.id == area_id,
+                    Area.fecha_eliminacion.is_(None)
+                )
+            )
+        ).scalars().all()
+
+        return tareas

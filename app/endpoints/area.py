@@ -1,6 +1,6 @@
 
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import parse_obj_as
 from app.dependencies.service import get_area_service
 from app.repositories.area import AreaRepository
@@ -19,5 +19,11 @@ async def get_area_by_id(
     area = await area_service.get_area_by_id(
         area_id=area_id
     )
+
+    if not area:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"error": "Area no encontrada"},
+        )
 
     return area
