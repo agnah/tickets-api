@@ -10,13 +10,7 @@ from app.endpoints.area import router as area_router
 app = FastAPI()
 setings = Settings()
 
-origins = [
-    "http://localhost",
-    "http://localhost:8080",
-    "http://localhost:8000",
-    "http://localhost:5173",
-    "http://localhost:3000",
-]
+origins = ["*"]
 
 
 app.add_middleware(
