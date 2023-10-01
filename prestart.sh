@@ -10,19 +10,15 @@ then
         echo "Removing .env file on this instance"
         rm /app/tickets-api/.env
     fi
+else
+    echo "TICKETS_API_REPOSITORY_PATH is set, not removing .env file"
 fi
 
-if [ -z "$TICKETS_API_REPOSITORY_PATH" ]
-then
-    echo "Sleeping 15 seconds"
-    sleep 15
-fi
+echo "Sleeping 15 seconds"
+sleep 15
 
 echo "Running migration"
 PYTHONPATH=. alembic upgrade head
 
-if [ -z "$TICKETS_API_REPOSITORY_PATH" ]
-then
-    echo "Sleeping 15 seconds"
-    sleep 15
-fi
+echo "Sleeping 15 seconds"
+sleep 15

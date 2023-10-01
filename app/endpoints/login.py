@@ -1,8 +1,10 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Depends
+from app.dependencies.service import get_usuario_service, get_login_service
 
-from app.schemas.usuario import UserLoginSchema
+from app.schemas.usuario import UserLoginSchema, EUSerField
 
-from app.services.external.login import login_to_activity_directory
+from app.services.login import LoginService
+from app.services.usuario import UsuarioService
 
 router = APIRouter()
 
@@ -10,13 +12,23 @@ router = APIRouter()
 @router.post("/login")
 async def login_user(
     payload: UserLoginSchema,
+    user_service: UsuarioService = Depends(get_usuario_service),
+    login_service: LoginService = Depends(get_login_service),
 ):
-    response = await login_to_activity_directory(payload)
+    user = await user_service.get_user_by_field(EUSerField.EMAIL, payload.email)
 
-    if response is None:
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            json={"error": "Usuario inexistente"},
+        )
+
+    login_data = await login_service.user_login(payload)
+
+    if login_data is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             json={"error": "Usuario o contraseña incorrectos"},
         )
-    else:
-        return response
+
+    return login_data

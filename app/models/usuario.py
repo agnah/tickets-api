@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, Enum, DateTime, ForeignKey, String, Text
+from sqlalchemy import Column, Enum, DateTime, ForeignKey, String
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.schemas.ticket import ESede
@@ -33,7 +33,8 @@ class Usuario(Base):
 
     fecha_creacion = Column(DateTime, server_default=func.now())
     fecha_modificacion = Column(
-        DateTime, server_default=func.now(), server_onupdate=func.now())
+        DateTime, server_default=func.now(), server_onupdate=func.now()
+    )
     fecha_eliminacion = Column(DateTime, default=None)
 
     area = relationship("Area")
