@@ -47,9 +47,6 @@ class TicketService(ServiceLayer):
     async def create_new_ticket(self, payload: CreateTicketPayload):
 
         ticket_repo = TicketRepository(db=self.db)
-        area_service = self.get_service("Area")
-
-        area_solicitante = await area_service.get_area_by_id(payload.area_solicitante)
 
         ticket = await ticket_repo.create_new_ticket(payload=payload)
 

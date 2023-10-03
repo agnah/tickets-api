@@ -1,8 +1,8 @@
 """Initial migration
 
-Revision ID: 385b01c967a5
+Revision ID: fe29ca57fe6d
 Revises: 
-Create Date: 2023-09-24 19:08:14.174656
+Create Date: 2023-10-03 00:10:31.908712
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 
 # revision identifiers, used by Alembic.
-revision = '385b01c967a5'
+revision = 'fe29ca57fe6d'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -41,14 +41,13 @@ def upgrade() -> None:
     op.create_table('usuario',
     sa.Column('id', sa.Integer().with_variant(mysql.INTEGER(unsigned=True), 'mysql'), autoincrement=True, nullable=False),
     sa.Column('token', sa.String(length=256), nullable=False),
-    sa.Column('nombre', sa.String(length=256), nullable=True),
-    sa.Column('apellido', sa.String(length=256), nullable=True),
+    sa.Column('nombre_apellido', sa.String(length=256), nullable=False),
     sa.Column('email', sa.String(length=256), nullable=False),
     sa.Column('celular', sa.String(length=256), nullable=True),
     sa.Column('telefono', sa.String(length=256), nullable=True),
     sa.Column('interno', sa.String(length=256), nullable=True),
     sa.Column('area_id', sa.Integer().with_variant(mysql.INTEGER(unsigned=True), 'mysql'), nullable=True),
-    sa.Column('sede', sa.Enum('BUENOS_AIRES', 'CORDOBA', 'MENDOZA', 'ROSARIO', 'TUCUMAN', name='esede'), nullable=False),
+    sa.Column('sede', sa.Enum('NUEVE_DE_JULIO', 'ANEXO1', 'ANEXO2', 'ANEXO3', name='esede'), nullable=False),
     sa.Column('piso', sa.String(length=256), nullable=True),
     sa.Column('perfil', sa.Enum('SOLICITANTE', 'RESPONSABLE_DE_AREA', 'COLABORADOR', 'OPERADOR', name='perfilusuario'), nullable=True),
     sa.Column('rol', sa.Enum('ADMINISTRADOR', 'EDITOR', 'LECTOR', name='rolusuario'), nullable=True),
@@ -67,11 +66,11 @@ def upgrade() -> None:
     sa.Column('telefono_solicitante', sa.String(length=256), nullable=True),
     sa.Column('celular_solicitante', sa.String(length=256), nullable=True),
     sa.Column('area_solicitante', sa.Integer().with_variant(mysql.INTEGER(unsigned=True), 'mysql'), nullable=True),
-    sa.Column('sede_solicitante', sa.Enum('BUENOS_AIRES', 'CORDOBA', 'MENDOZA', 'ROSARIO', 'TUCUMAN', name='esede'), nullable=False),
+    sa.Column('sede_solicitante', sa.Enum('NUEVE_DE_JULIO', 'ANEXO1', 'ANEXO2', 'ANEXO3', name='esede'), nullable=False),
     sa.Column('piso_solicitante', sa.String(length=256), nullable=True),
     sa.Column('referencia', sa.String(length=256), nullable=True),
     sa.Column('area_asignada_id', sa.Integer().with_variant(mysql.INTEGER(unsigned=True), 'mysql'), nullable=False),
-    sa.Column('tecnico_asignado_id', sa.Integer().with_variant(mysql.INTEGER(unsigned=True), 'mysql'), nullable=False),
+    sa.Column('tecnico_asignado_id', sa.Integer().with_variant(mysql.INTEGER(unsigned=True), 'mysql'), nullable=True),
     sa.Column('prioridad', sa.Enum('ALTA', 'BAJA', name='prioridadticket'), nullable=False),
     sa.Column('estado', sa.Enum('PENDIENTE', 'EN_CURSO', 'FINALIZADO', 'DERIVADO', 'ANULADO', name='estadoticket'), nullable=False),
     sa.Column('descripcion', sa.Text(length=1048576), nullable=False),

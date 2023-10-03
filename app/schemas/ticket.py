@@ -19,12 +19,10 @@ class ETicketField(str, Enum):
     ESTADO = "estado"
 
 class ESede(str, Enum):
-    BUENOS_AIRES = "buenos_aires"
-    CORDOBA = "cordoba"
-    MENDOZA = "mendoza"
-    ROSARIO = "rosario"
-    TUCUMAN = "tucuman"
-
+    NUEVE_DE_JULIO = "9_de_julio"
+    ANEXO1 = "anexo1"
+    ANEXO2 = "anexo2"
+    ANEXO3 = "anexo3"
 
 class PrioridadTicket(str, Enum):
     ALTA = "alta"
@@ -46,14 +44,15 @@ class CreateTicketPayload(BaseModel):
     telefono_solicitante: str = None
     celular_solicitante: str = None
     area_solicitante: int = None
+    sede_solicitante: ESede = ESede.NUEVE_DE_JULIO
     piso_solicitante: str = None
 
-    referencia: str
+    referencia: str = None
     area_asignada_id: int
-    tecnico_asignado_id: int
+    tecnico_asignado_id: int = None
 
-    prioridad: PrioridadTicket
-    estado: EstadoTicket
+    prioridad: PrioridadTicket = PrioridadTicket.BAJA
+    estado: str = EstadoTicket.PENDIENTE
 
     descripcion: str
 

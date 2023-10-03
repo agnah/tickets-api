@@ -23,12 +23,12 @@ class Ticket(Base):
     celular_solicitante = Column(String(256), nullable=True)
     area_solicitante = Column(UnsignedInt, ForeignKey("area.id"), nullable=True)
     # TODO: Completar una vez que nos pasen los datos
-    sede_solicitante = Column(Enum(ESede), nullable=False, default=ESede.BUENOS_AIRES)
+    sede_solicitante = Column(Enum(ESede), nullable=False, default=ESede.NUEVE_DE_JULIO)
     piso_solicitante = Column(String(256), nullable=True)
 
     referencia = Column(String(256), nullable=True)
     area_asignada_id = Column(UnsignedInt, ForeignKey("area.id"), nullable=False)
-    tecnico_asignado_id = Column(UnsignedInt, ForeignKey("usuario.id"), nullable=False)
+    tecnico_asignado_id = Column(UnsignedInt, ForeignKey("usuario.id"), nullable=True)
 
     prioridad = Column(Enum(PrioridadTicket), nullable=False,
                        default=PrioridadTicket.BAJA)
