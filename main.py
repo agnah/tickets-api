@@ -6,6 +6,7 @@ from app.endpoints.area import router as area_router
 from app.endpoints.healthcheck import router as healthcheck_router
 from app.endpoints.ticket import router as tickets_router
 from app.endpoints.usuario import router as usuario_router
+from app.endpoints.login import router as login_router
 
 app = FastAPI()
 setings = Settings()
@@ -26,3 +27,4 @@ app.include_router(healthcheck_router, prefix="/api/healthcheck", tags=["Healthc
 app.include_router(tickets_router, prefix="/api/tickets", tags=["Tickets"])
 app.include_router(area_router, prefix="/api/area", tags=["Area"])
 app.include_router(usuario_router, prefix="/api/usuario", tags=["Usuario"])
+app.include_router(login_router, prefix="/api", tags=["Login"])

@@ -23,12 +23,12 @@ async def login_user(
             json={"error": "Usuario inexistente"},
         )
 
-    login_data = await login_service.user_login(payload)
+    access_token = await login_service.user_login(payload)
 
-    if login_data is None:
+    if access_token is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             json={"error": "Usuario o contraseña incorrectos"},
         )
 
-    return login_data
+    return {"access_token": access_token, "token_type": "bearer"}

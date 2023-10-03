@@ -3,6 +3,8 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.schemas.ticket import ESede
 
+# from app.schemas.ticket import ESede
+
 from app.schemas.usuario import PerfilUsuario, RolUsuario
 
 

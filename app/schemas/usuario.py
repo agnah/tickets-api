@@ -1,7 +1,7 @@
 from datetime import datetime
 from enum import Enum
 
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
 
 class EUSerField(str, Enum):
@@ -14,10 +14,10 @@ class EUSerField(str, Enum):
 
 
 class PerfilUsuario(str, Enum):
-    ADMINISTRADOR = 'administrador'
-    TECNICO = 'tecnico'
-    ADMINISTRATIVO = 'administrativo'
-    SUPERADMIN = 'superadmin'
+    ADMINISTRADOR = "administrador"
+    TECNICO = "tecnico"
+    ADMINISTRATIVO = "administrativo"
+    SUPERADMIN = "superadmin"
 
 
 class RolUsuario(str, Enum):
@@ -83,3 +83,11 @@ class UpdateUsuarioPayload(BaseModel):
 
     perfil: PerfilUsuario = None
     rol: RolUsuario = None
+
+    class Config:
+        orm_mode = True
+
+
+class UserLoginSchema(BaseModel):
+    email: EmailStr
+    password: str
