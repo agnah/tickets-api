@@ -1,7 +1,7 @@
 from datetime import datetime
 from enum import Enum
 
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
 
 class EUSerField(str, Enum):
@@ -50,3 +50,8 @@ class UsuarioSchema(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class UserLoginSchema(BaseModel):
+    email: EmailStr
+    password: str
