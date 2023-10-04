@@ -1,14 +1,20 @@
 from typing import Optional, Union
 
 from pydantic import parse_obj_as
+
 from app.repositories.usuario import UsuarioRepository
-from app.schemas.usuario import EUSerField, UsuarioSchema
-from .layer import register_service, ServiceLayer
+from app.schemas.usuario import (
+    CreateUsuarioPayload,
+    EUSerField,
+    UpdateUsuarioPayload,
+    UsuarioSchema,
+)
+
+from .layer import ServiceLayer, register_service
 
 
 @register_service("Usuario")
 class UsuarioService(ServiceLayer):
-
     async def get_user_by_field(
         self,
         field: EUSerField,
@@ -19,3 +25,22 @@ class UsuarioService(ServiceLayer):
 
         return parse_obj_as(UsuarioSchema, user) if user else None
 
+    async def get_users_list(self) -> Optional[UsuarioSchema]:
+        repo = UsuarioRepository(db=self.db)
+        users = await repo.get_users_list()
+
+        return parse_obj_as(list[UsuarioSchema], users) if users else []
+
+    async def create_user(self, payload: CreateUsuarioPayload):
+        repo = UsuarioRepository(db=self.db)
+        user = await repo.create_user(payload)
+
+        return parse_obj_as(UsuarioSchema, user) if user else None
+
+    async def update_user(
+        self, field: EUSerField, value: Union[int, str], payload: UpdateUsuarioPayload
+    ):
+        repo = UsuarioRepository(db=self.db)
+        user = await repo.update_user(field, value, payload)
+
+        return parse_obj_as(UsuarioSchema, user) if user else None
