@@ -73,6 +73,27 @@ class TicketRepository(BaseRepository):
 
         return new_ticket
 
+    async def update_ticket(
+        self, ticket_id: int, payload: CreateTicketPayload
+    ) -> TicketSchema:
+
+        ticket: TicketSchema = (
+            await self.db.execute(
+                select(Ticket)
+                .where(
+                    Ticket.id == ticket_id,
+                    Ticket.fecha_eliminacion.is_(None)
+                )
+            )
+        ).scalar_one_or_none()
+
+        if ticket:
+            for field, value in payload:
+                setattr(ticket, field, value)
+            await self.db.commit()
+
+        return ticket
+
     async def get_ticket_by_id(self, ticket_id: int) -> TicketSchema:
 
         ticket: TicketSchema = (

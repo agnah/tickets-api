@@ -1,9 +1,10 @@
 from datetime import datetime, timedelta
+from typing import Optional
 from pydantic import parse_obj_as
 
 from app.repositories.ticket import TicketRepository
 from app.schemas.area import TareaAreaSchema
-from app.schemas.ticket import AddTareaTicketPayload, CreateTicketPayload, ETicketField, EstadoTicket, TicketSchema, TicketTareaSchema
+from app.schemas.ticket import AddTareaTicketPayload, CreateTicketPayload, ETicketField, EstadoTicket, TicketSchema, TicketTareaSchema, UpdateTicketPayload
 from .layer import register_service, ServiceLayer
 
 
@@ -13,7 +14,7 @@ class TicketService(ServiceLayer):
     async def get_last_months_tickets_by_user(
         self,
         user_id: int,
-    ) -> list[TicketSchema]:
+    ):
 
         repo = TicketRepository(db=self.db)
         tickets = await repo.get_last_months_tickets_by_user(
@@ -49,6 +50,16 @@ class TicketService(ServiceLayer):
         ticket_repo = TicketRepository(db=self.db)
 
         ticket = await ticket_repo.create_new_ticket(payload=payload)
+
+        return parse_obj_as(TicketSchema, ticket) if ticket else None
+
+    async def update_ticket(self, ticket_id: int, payload: UpdateTicketPayload):
+
+        ticket_repo = TicketRepository(db=self.db)
+
+        # TBD: Deberiamos llamar a método para almacenar historial
+
+        ticket = await ticket_repo.update_ticket(ticket_id=ticket_id, payload=payload)
 
         return parse_obj_as(TicketSchema, ticket) if ticket else None
 

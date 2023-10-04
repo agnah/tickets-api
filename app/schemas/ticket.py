@@ -18,11 +18,13 @@ class ETicketField(str, Enum):
     PRIORIDAD = "prioridad"
     ESTADO = "estado"
 
+
 class ESede(str, Enum):
     NUEVE_DE_JULIO = "9_de_julio"
     ANEXO1 = "anexo1"
     ANEXO2 = "anexo2"
     ANEXO3 = "anexo3"
+
 
 class PrioridadTicket(str, Enum):
     ALTA = "alta"
@@ -63,6 +65,20 @@ class CreateTicketPayload(BaseModel):
     class Config:
         orm_mode = True
 
+
+class UpdateTicketPayload(BaseModel):
+    referencia: str = None
+
+    tecnico_asignado_id: int = None
+
+    estado: str = None
+    descripcion: str = None
+    archivos: str = None
+
+    class Config:
+        orm_mode = True
+
+
 class AddTareaTicketPayload(BaseModel):
     ticket_id: int
     tarea_id: int
@@ -70,6 +86,7 @@ class AddTareaTicketPayload(BaseModel):
 
     class Config:
         orm_mode = True
+
 
 class TicketTareaSchema(BaseModel):
     id: int
@@ -84,6 +101,7 @@ class TicketTareaSchema(BaseModel):
 
     class Config:
         orm_mode = True
+
 
 class TicketSchema(BaseModel):
     id: int
