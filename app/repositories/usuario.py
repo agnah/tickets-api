@@ -60,7 +60,7 @@ class UsuarioRepository(BaseRepository):
 
         await self.db.execute(
             update(Usuario)
-            .where(column == value, Usuario.deleted_at.is_(None))
+            .where(column == value, Usuario.fecha_eliminacion.is_(None))
             .values(**payload.dict(exclude_none=True))
         )
 

@@ -66,6 +66,8 @@ class CreateUsuarioPayload(BaseModel):
     perfil: PerfilUsuario
     rol: RolUsuario
 
+    token: str
+
 
 class UpdateUsuarioPayload(BaseModel):
     nombre: str = None
