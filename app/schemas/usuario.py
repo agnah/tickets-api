@@ -50,3 +50,35 @@ class UsuarioSchema(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class CreateUsuarioPayload(BaseModel):
+    nombre: str
+    apellido: str
+    email: str
+    celular: str
+    telefono: str
+    interno: str
+
+    area_id: int
+    piso: str
+
+    perfil: PerfilUsuario
+    rol: RolUsuario
+
+    token: str
+
+
+class UpdateUsuarioPayload(BaseModel):
+    nombre: str = None
+    apellido: str = None
+    email: str = None
+    celular: str = None
+    telefono: str = None
+    interno: str = None
+
+    area_id: int = None
+    piso: str = None
+
+    perfil: PerfilUsuario = None
+    rol: RolUsuario = None
