@@ -15,13 +15,14 @@ class EUSerField(str, Enum):
 
 class PerfilUsuario(str, Enum):
     SOLICITANTE = "solicitante"
-    RESPONSABLE_DE_AREA = "responsable_de_area"
-    COLABORADOR = "colaborador"
-    OPERADOR = "operador"
+    ADMINISTRADOR = 'administrador'
+    TECNICO = 'tecnico'
+    ADMINISTRATIVO = 'administrativo'
 
 
 class RolUsuario(str, Enum):
-    ADMINISTRADOR = "administrador"
+    DIOS = "dios"
+    ADMIN = "admin"
     EDITOR = "editor"
     LECTOR = "lector"
 
