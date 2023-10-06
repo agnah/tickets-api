@@ -1,8 +1,8 @@
 """Initial migration
 
-Revision ID: fe29ca57fe6d
+Revision ID: b75a5e68034a
 Revises: 
-Create Date: 2023-10-03 00:10:31.908712
+Create Date: 2023-10-06 11:37:30.441202
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 
 # revision identifiers, used by Alembic.
-revision = 'fe29ca57fe6d'
+revision = 'b75a5e68034a'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -49,8 +49,8 @@ def upgrade() -> None:
     sa.Column('area_id', sa.Integer().with_variant(mysql.INTEGER(unsigned=True), 'mysql'), nullable=True),
     sa.Column('sede', sa.Enum('NUEVE_DE_JULIO', 'ANEXO1', 'ANEXO2', 'ANEXO3', name='esede'), nullable=False),
     sa.Column('piso', sa.String(length=256), nullable=True),
-    sa.Column('perfil', sa.Enum('SOLICITANTE', 'RESPONSABLE_DE_AREA', 'COLABORADOR', 'OPERADOR', name='perfilusuario'), nullable=True),
-    sa.Column('rol', sa.Enum('ADMINISTRADOR', 'EDITOR', 'LECTOR', name='rolusuario'), nullable=True),
+    sa.Column('perfil', sa.Enum('SOLICITANTE', 'ADMINISTRADOR', 'TECNICO', 'ADMINISTRATIVO', name='perfilusuario'), nullable=True),
+    sa.Column('rol', sa.Enum('DIOS', 'ADMIN', 'EDITOR', 'LECTOR', name='rolusuario'), nullable=True),
     sa.Column('fecha_creacion', sa.DateTime(), server_default=sa.text('now()'), nullable=True),
     sa.Column('fecha_modificacion', sa.DateTime(), server_default=sa.text('now()'), nullable=True),
     sa.Column('fecha_eliminacion', sa.DateTime(), nullable=True),
