@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from enum import Enum
+from typing import Optional
 
 from pydantic import BaseModel
 
@@ -42,7 +43,6 @@ class EstadoTicket(str, Enum):
 class CreateTicketPayload(BaseModel):
     email_solicitante: str
     nombre_solicitante: str = None
-    apellido_solicitante: str = None
     telefono_solicitante: str = None
     celular_solicitante: str = None
     area_solicitante: int = None
@@ -58,7 +58,7 @@ class CreateTicketPayload(BaseModel):
 
     descripcion: str
 
-    pre_tarea: EPreTareas
+    pre_tarea: Optional[EPreTareas] = None
 
     archivos: str = None
 

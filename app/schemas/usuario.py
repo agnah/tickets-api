@@ -8,8 +8,7 @@ class EUSerField(str, Enum):
     ID = "id"
     TOKEN = "token"
     EMAIL = "email"
-    NOMBRE = "nombre"
-    APELLIDO = "apellido"
+    NOMBRE_APELLIDO = "nombre_apellido"
     PERFIL = "perfil"
     ROL = "rol"
 
@@ -31,8 +30,7 @@ class UsuarioSchema(BaseModel):
     id: int
     token: str
 
-    nombre: str
-    apellido: str
+    nombre_apellido: str
     email: str
     celular: str
     telefono: str
@@ -53,8 +51,7 @@ class UsuarioSchema(BaseModel):
 
 
 class CreateUsuarioPayload(BaseModel):
-    nombre: str
-    apellido: str
+    nombre_apellido: str
     email: str
     celular: str
     telefono: str
@@ -70,8 +67,7 @@ class CreateUsuarioPayload(BaseModel):
 
 
 class UpdateUsuarioPayload(BaseModel):
-    nombre: str = None
-    apellido: str = None
+    nombre_apellido: str = None
     email: str = None
     celular: str = None
     telefono: str = None
