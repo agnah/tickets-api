@@ -5,11 +5,12 @@ from typing import Optional
 
 from pydantic import BaseModel
 
-from app.schemas.area import EPreTareas
+from app.schemas.area import AreasSolicitante, EPreTareas
 
 
 class ETicketField(str, Enum):
     ID = "id"
+    IDENTIFICADOR = "identificador"
 
     EMAIL_SOLICITANTE = "email_solicitante"
 
@@ -21,7 +22,7 @@ class ETicketField(str, Enum):
 
 
 class ESede(str, Enum):
-    NUEVE_DE_JULIO = "9_de_julio"
+    NUEVE_DE_JULIO = "nueve_de_julio"
     ANEXO1 = "anexo1"
     ANEXO2 = "anexo2"
     ANEXO3 = "anexo3"
@@ -45,7 +46,7 @@ class CreateTicketPayload(BaseModel):
     nombre_solicitante: str = None
     telefono_solicitante: str = None
     celular_solicitante: str = None
-    area_solicitante: int = None
+    area_solicitante: Optional[AreasSolicitante] = AreasSolicitante.ADMINISTRACION
     sede_solicitante: ESede = ESede.NUEVE_DE_JULIO
     piso_solicitante: str = None
 
@@ -58,8 +59,6 @@ class CreateTicketPayload(BaseModel):
 
     descripcion: str
 
-    pre_tarea: Optional[EPreTareas] = None
-
     archivos: str = None
 
     class Config:
@@ -67,6 +66,13 @@ class CreateTicketPayload(BaseModel):
 
 
 class UpdateTicketPayload(BaseModel):
+    nombre_solictante: str = None
+    telefono_solicitante: str = None
+    celular_solicitante: str = None
+    area_solicitante: str = None
+    sede_solicitante: Optional[ESede]
+    piso_solicitante: str = None
+
     referencia: str = None
 
     tecnico_asignado_id: int = None
@@ -105,13 +111,13 @@ class TicketTareaSchema(BaseModel):
 
 class TicketSchema(BaseModel):
     id: int
+    identificador: str
 
     email_solicitante: str
     nombre_solicitante: str = None
-    apellido_solicitante: str = None
     telefono_solicitante: str = None
     celular_solicitante: str = None
-    area_solicitante: int = None
+    area_solicitante: Optional[AreasSolicitante] = AreasSolicitante.ADMINISTRACION
     piso_solicitante: str = None
 
     referencia: str = None

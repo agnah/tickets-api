@@ -16,14 +16,16 @@ class Usuario(Base):
     id = Column(UnsignedInt, autoincrement=True, primary_key=True)
     token = Column(String(256), nullable=False)
 
-    nombre_apellido= Column(String(256), nullable=False)
+    nombre = Column(String(256), nullable=False)
+    apellido = Column(String(256), nullable=False)
     email = Column(String(256), nullable=False)
     celular = Column(String(256), nullable=True)
     telefono = Column(String(256), nullable=True)
     interno = Column(String(256), nullable=True)
 
     area_id = Column(UnsignedInt, ForeignKey("area.id"))
-    sede = Column(Enum(ESede), nullable=False, default=ESede.NUEVE_DE_JULIO) # TODO: Completar una vez que nos pasen los datos
+    # TODO: Completar una vez que nos pasen los datos
+    sede = Column(Enum(ESede), nullable=False, default=ESede.NUEVE_DE_JULIO)
     piso = Column(String(256), nullable=True)
 
     perfil = Column(Enum(PerfilUsuario))

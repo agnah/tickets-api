@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Enum, String, func, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
 
-from app.schemas.area import NombreArea
+from app.schemas.area import AreaAsignar
 
 
 from .base import Base, UnsignedInt
@@ -13,7 +13,7 @@ class Area(Base):
 
     id = Column(UnsignedInt, autoincrement=True, primary_key=True)
 
-    nombre = Column(Enum(NombreArea), nullable=False)
+    nombre = Column(Enum(AreaAsignar), nullable=False)
 
     fecha_creacion = Column(DateTime, server_default=func.now())
     fecha_modificacion = Column(

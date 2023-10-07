@@ -14,10 +14,10 @@ class EUSerField(str, Enum):
 
 
 class PerfilUsuario(str, Enum):
-    SOLICITANTE = "solicitante"
     ADMINISTRADOR = 'administrador'
     TECNICO = 'tecnico'
     ADMINISTRATIVO = 'administrativo'
+    SUPERADMIN = 'superadmin'
 
 
 class RolUsuario(str, Enum):
@@ -31,7 +31,8 @@ class UsuarioSchema(BaseModel):
     id: int
     token: str
 
-    nombre_apellido: str
+    nombre: str
+    apellido: str
     email: str
     celular: str
     telefono: str
@@ -52,7 +53,8 @@ class UsuarioSchema(BaseModel):
 
 
 class CreateUsuarioPayload(BaseModel):
-    nombre_apellido: str
+    nombre: str
+    apellido: str
     email: str
     celular: str
     telefono: str
@@ -68,7 +70,8 @@ class CreateUsuarioPayload(BaseModel):
 
 
 class UpdateUsuarioPayload(BaseModel):
-    nombre_apellido: str = None
+    nombre: str = None
+    apellido: str = None
     email: str = None
     celular: str = None
     telefono: str = None

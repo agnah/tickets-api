@@ -14,17 +14,24 @@ class EPreTareas(str, Enum):
     TAREA3 = "tarea3"
 
 
-class NombreArea(str, Enum):
-    COMPUTOS = "computos"
-    TELEFONIA = "telefonia"
-    SOPORTE_TECNICO = "soporte_tecnico"
-    CID = "cid"
+class AreaAsignar(str, Enum):
     GDE = "gde"
+    COMPUTOS = "computos"
+    SOPORTE = "soporte"
+    TELEFONIA = "telefonia"
+    SISTEMAS = "sistemas"
+
+
+class AreasSolicitante(str, Enum):
+    ADMINISTRACION = "administracion"
+    RRHH = "rrhh"
+    CONTABILIDAD = "contabilidad"
+    LEGALES = "legales"
 
 
 class AreaSchema(BaseModel):
     id: int
-    nombre: NombreArea
+    nombre: AreaAsignar
 
     fecha_creacion: datetime
     fecha_modificacion: datetime
@@ -32,6 +39,7 @@ class AreaSchema(BaseModel):
 
     class Config:
         orm_mode = True
+
 
 class TareaAreaSchema(BaseModel):
     id: int

@@ -2,7 +2,7 @@ from sqlalchemy import Column, Enum, DateTime, ForeignKey, String, Text
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
-from app.schemas.area import EPreTareas
+from app.schemas.area import AreasSolicitante, EPreTareas
 from app.schemas.tarea import EEstadoTarea
 from app.schemas.ticket import ESede, PrioridadTicket, EstadoTicket
 
@@ -15,13 +15,14 @@ class Ticket(Base):
     __mapper_args__ = {"eager_defaults": True}
 
     id = Column(UnsignedInt, autoincrement=True, primary_key=True)
+    identificador = Column(String(256), nullable=False, unique=True, default="identificador_temporal")
 
     email_solicitante = Column(String(256), nullable=False)
     nombre_solicitante = Column(String(256), nullable=True)
-    apellido_solicitante = Column(String(256), nullable=True)
     telefono_solicitante = Column(String(256), nullable=True)
     celular_solicitante = Column(String(256), nullable=True)
-    area_solicitante = Column(UnsignedInt, ForeignKey("area.id"), nullable=True)
+    area_solicitante = Column(Enum(AreasSolicitante), nullable=False, default=AreasSolicitante.ADMINISTRACION)
+
     # TODO: Completar una vez que nos pasen los datos
     sede_solicitante = Column(Enum(ESede), nullable=False, default=ESede.NUEVE_DE_JULIO)
     piso_solicitante = Column(String(256), nullable=True)
