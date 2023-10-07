@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Header, status
 from pydantic import Required
 
 from app.schemas.usuario import EUSerField
-from app.schemas.ticket import CreateTicketPayload, EstadoTicket, TicketSchema, TicketTareaSchema, UpdateTicketPayload
+from app.schemas.ticket import CreateTicketPayload, ETicketField, EstadoTicket, TicketSchema, TicketTareaSchema, UpdateTicketPayload
 
 from app.dependencies.service import get_area_service, get_ticket_service, get_usuario_service
 
@@ -16,7 +16,7 @@ router = APIRouter()
 
 
 @router.get("/inicio/")
-async def get_last_months_tickets_by_user(
+async def get_last_ten_days_tickets_by_user(
     token: str = Header(Required, alias="X-Token"),
     usuario_service: UsuarioService = Depends(get_usuario_service),
     tickets_service: TicketService = Depends(get_ticket_service)
@@ -30,20 +30,27 @@ async def get_last_months_tickets_by_user(
             detail={"error": "Usuario no encontrado"},
         )
 
-    tickets = await tickets_service.get_last_months_tickets_by_user(
-        user_id=user.id
-    )
+    tickets = await tickets_service.get_last_ten_days_tickets()
     return tickets
 
 
 @router.get("/")
 async def get_tickets_by_field(
-    field: str = None,
+    token: str = Header(Required, alias="X-Token"),
+    field: ETicketField = ETicketField.ID,
     value: str = None,
     start_date: datetime = None,
     end_date: datetime = None,
+    usuario_service: UsuarioService = Depends(get_usuario_service),
     tickets_service: TicketService = Depends(get_ticket_service)
 ) -> list[TicketSchema]:
+    user = await usuario_service.get_user_by_field(field=EUSerField.TOKEN, value=token)
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"error": "Usuario no encontrado"},
+        )
 
     tickets = await tickets_service.get_tickets_by_field_in_date_range(
         field=field,
@@ -82,11 +89,6 @@ async def update_ticket(
             status_code=status.HTTP_404_NOT_FOUND,
             detail={"error": "Usuario no encontrado"},
         )
-    if usuario.rol == "lector":
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail={"error": "Usuario no autorizado"},
-        )
 
     ticket_id = await ticket_service.update_ticket(
         ticket_id=ticket_id,
@@ -115,11 +117,6 @@ async def anular_ticket(
             status_code=status.HTTP_404_NOT_FOUND,
             detail={"error": "Usuario no encontrado"},
         )
-    if usuario.rol not in ["administrador", "editor"]:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail={"error": "Usuario no autorizado"},
-        )
 
     ticket = await ticket_service.anular_ticket(
         ticket_id=ticket_id
@@ -147,13 +144,8 @@ async def cerrar_ticket(
             status_code=status.HTTP_404_NOT_FOUND,
             detail={"error": "Usuario no encontrado"},
         )
-    if usuario.rol not in ["administrador", "editor"]:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail={"error": "Usuario no autorizado"},
-        )
 
-    ticket = await ticket_service.actualizar_estado_ticket(ticket_id=ticket_id, estado=EstadoTicket.ANULADO)
+    ticket = await ticket_service.actualizar_estado_ticket(ticket_id=ticket_id, estado=EstadoTicket.FINALIZADO)
     if not ticket:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -177,11 +169,6 @@ async def derivar_ticket(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail={"error": "Usuario no encontrado"},
-        )
-    if usuario.rol not in ["administrador", "editor"]:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail={"error": "Usuario no autorizado"},
         )
 
     ticket = await ticket_service.derivar_ticket(
@@ -220,8 +207,9 @@ async def agregar_tarea(
             detail={"error": "Ticket no encontrado"}
         )
 
-    tareas = await area_service.get_all_tareas_by_area_id(area_id=ticket.area_id)
-    tarea_a_agregar = next((tarea for tarea in tareas if tarea.tarea == tarea), None)
+    area_tareas = await area_service.get_all_tareas_by_area_id(area_id=ticket.area_asignada_id)
+    tarea_a_agregar = next(
+        (area_tarea for area_tarea in area_tareas if area_tarea.tarea == tarea), None)
     if not tarea_a_agregar:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

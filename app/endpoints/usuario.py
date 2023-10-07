@@ -85,12 +85,12 @@ async def update_user(
             detail={"error": "Usuario no encontrado"},
         )
 
-    update_user = await usuario_service.update_user(field, value, payload)
+    updated_user_id = await usuario_service.update_user(field, value, payload)
 
-    if not update_user:
+    if not updated_user_id:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail={"error": "El usuario no fue actualizado"},
+            detail={"error": f"El usuario con id={updated_user_id} no fue actualizado"},
         )
 
-    return update_user
+    return updated_user_id

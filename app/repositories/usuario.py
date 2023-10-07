@@ -66,4 +66,4 @@ class UsuarioRepository(BaseRepository):
 
         await self.db.commit()
 
-        return current_user
+        return current_user.id

@@ -39,8 +39,8 @@ class AreaRepository(BaseRepository):
             await self.db.execute(
                 select(TareaAreaRelacion)
                 .where(
-                    Area.id == area_id,
-                    Area.fecha_eliminacion.is_(None)
+                    TareaAreaRelacion.area_id == area_id,
+                    TareaAreaRelacion.fecha_eliminacion.is_(None)
                 )
             )
         ).scalars().all()

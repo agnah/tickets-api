@@ -5,21 +5,19 @@ from pydantic import parse_obj_as
 from app.repositories.ticket import TicketRepository
 from app.schemas.area import TareaAreaSchema
 from app.schemas.ticket import AddTareaTicketPayload, CreateTicketPayload, ETicketField, EstadoTicket, TicketSchema, TicketTareaSchema, UpdateTicketPayload
+from app.services.area import AreaService
 from .layer import register_service, ServiceLayer
 
 
 @register_service("Ticket")
 class TicketService(ServiceLayer):
 
-    async def get_last_months_tickets_by_user(
-        self,
-        user_id: int,
+    async def get_last_ten_days_tickets(
+        self
     ):
 
         repo = TicketRepository(db=self.db)
-        tickets = await repo.get_last_months_tickets_by_user(
-            user_id=user_id
-        )
+        tickets = await repo.get_last_ten_days_tickets()
 
         for ticket in tickets:
             if datetime.now() > (ticket.fecha_creacion + timedelta(days=3)):
@@ -48,8 +46,12 @@ class TicketService(ServiceLayer):
     async def create_new_ticket(self, payload: CreateTicketPayload):
 
         ticket_repo = TicketRepository(db=self.db)
+        area_service: AreaService = self.get_service("Area")
+        area = await area_service.get_area_by_id(area_id=payload.area_asignada_id)
 
-        ticket = await ticket_repo.create_new_ticket(payload=payload)
+        prefix = area.nombre[0:3].upper()
+
+        ticket = await ticket_repo.create_new_ticket(payload=payload, prefix=prefix)
 
         return parse_obj_as(TicketSchema, ticket) if ticket else None
 

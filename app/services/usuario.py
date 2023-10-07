@@ -41,6 +41,6 @@ class UsuarioService(ServiceLayer):
         self, field: EUSerField, value: Union[int, str], payload: UpdateUsuarioPayload
     ):
         repo = UsuarioRepository(db=self.db)
-        user = await repo.update_user(field, value, payload)
+        update_user_id = await repo.update_user(field, value, payload)
 
-        return parse_obj_as(UsuarioSchema, user) if user else None
+        return update_user_id

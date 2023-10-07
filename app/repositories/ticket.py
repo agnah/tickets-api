@@ -5,6 +5,7 @@ from attr import define
 
 from sqlalchemy import select, update
 from sqlalchemy.orm import InstrumentedAttribute, joinedload
+from app.helpers import identificador_generator
 
 from app.models.ticket import Ticket, TicketTareaRelacion
 
@@ -20,17 +21,15 @@ class TicketRepository(BaseRepository):
     Repository to handle CRUD operations on Ticket model
     """
 
-    async def get_last_months_tickets_by_user(
-        self, user_id: int
+    async def get_last_ten_days_tickets(
+        self
     ) -> list[TicketSchema]:
 
         tickets: list[TicketSchema] = (
             await self.db.execute(
                 select(Ticket)
                 .where(
-                    Ticket.tecnico_asignado_id == user_id,
-                    Ticket.fecha_creacion >= datetime.now() - timedelta(days=30),
-                    Ticket.estado.not_in(["anulado", "finalizado"]),
+                    Ticket.fecha_creacion >= datetime.now() - timedelta(days=10),
                     Ticket.fecha_eliminacion.is_(None))
             )
         ).scalars().all()
@@ -64,10 +63,9 @@ class TicketRepository(BaseRepository):
         return tickets
 
     async def create_new_ticket(
-        self, payload: CreateTicketPayload
+        self, payload: CreateTicketPayload, prefix: str
     ):
-
-        new_ticket = Ticket(**payload.dict(exclude_none=True))
+        new_ticket = Ticket(identificador=identificador_generator.generate_custom_identificador(prefix) ,**payload.dict(exclude_none=True))
         self.db.add(new_ticket)
         await self.db.commit()
 
@@ -162,6 +160,7 @@ class TicketRepository(BaseRepository):
         if ticket:
             ticket.area_asignada_id = area_id
             ticket.estado = EstadoTicket.DERIVADO
+            ticket.tecnico_asignado_id = None
 
             await self.db.commit()
 
