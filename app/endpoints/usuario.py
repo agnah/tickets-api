@@ -51,15 +51,23 @@ async def create_user(
     payload: CreateUsuarioPayload,
     usuario_service: UsuarioService = Depends(get_usuario_service),
 ) -> UsuarioSchema:
-    user = await usuario_service.create_user(payload)
+    user = await usuario_service.get_user_by_field(EUSerField.EMAIL, payload.email)
 
-    if not user:
+    if user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail={"error": "Usuario no creado"},
+            detail={"error": "El usuario ya existe"},
         )
 
-    return user
+    new_user = await usuario_service.create_user(payload)
+
+    if not new_user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"error": "El usuario no fue creado"},
+        )
+
+    return new_user
 
 
 @router.patch("/{field}/{value}")
@@ -77,12 +85,12 @@ async def update_user(
             detail={"error": "Usuario no encontrado"},
         )
 
-    user = await usuario_service.update_user(field, value, payload)
+    update_user = await usuario_service.update_user(field, value, payload)
 
-    if not user:
+    if not update_user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail={"error": "Usuario no actualizado"},
+            detail={"error": "El usuario no fue actualizado"},
         )
 
-    return user
+    return update_user
