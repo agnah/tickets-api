@@ -26,17 +26,17 @@ class Ticket(Base):
     sede_solicitante = Column(Enum(ESede), nullable=False, default=ESede.NUEVE_DE_JULIO)
     piso_solicitante = Column(String(256), nullable=True)
 
-    referencia = Column(String(256), nullable=True)
+    referencia = Column(String(256), nullable=True, default=None)
     area_asignada_id = Column(UnsignedInt, ForeignKey("area.id"), nullable=False)
-    tecnico_asignado_id = Column(UnsignedInt, ForeignKey("usuario.id"), nullable=True)
+    tecnico_asignado_id = Column(UnsignedInt, ForeignKey("usuario.id"), nullable=True, default=None)
 
     prioridad = Column(Enum(PrioridadTicket), nullable=False,
                        default=PrioridadTicket.BAJA)
     estado = Column(Enum(EstadoTicket), nullable=False, default=EstadoTicket.PENDIENTE)
 
-    descripcion = Column(Text(1048576), nullable=False)  # 1MiB
+    descripcion = Column(Text(1048576), nullable=True)  # 1MiB
 
-    pre_tarea = Column(Enum(EPreTareas), nullable=False)
+    pre_tarea = Column(Enum(EPreTareas), nullable=True, default=None)
 
     archivos = Column(String(256), nullable=True)
 

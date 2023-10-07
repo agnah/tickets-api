@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from typing import Optional
 from attr import define
 
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.orm import InstrumentedAttribute, joinedload
 
 from app.models.ticket import Ticket, TicketTareaRelacion
@@ -11,7 +11,7 @@ from app.models.ticket import Ticket, TicketTareaRelacion
 from app.repositories.base import BaseRepository
 from app.schemas.tarea import EEstadoTarea
 
-from app.schemas.ticket import AddTareaTicketPayload, CreateTicketPayload, ETicketField, EstadoTicket, TicketSchema, TicketTareaSchema
+from app.schemas.ticket import AddTareaTicketPayload, CreateTicketPayload, ETicketField, EstadoTicket, TicketSchema, TicketTareaSchema, UpdateTicketPayload
 
 
 @define
@@ -65,34 +65,28 @@ class TicketRepository(BaseRepository):
 
     async def create_new_ticket(
         self, payload: CreateTicketPayload
-    ) -> TicketSchema:
+    ):
 
-        new_ticket = Ticket(**payload.dict())
+        new_ticket = Ticket(**payload.dict(exclude_none=True))
         self.db.add(new_ticket)
         await self.db.commit()
 
         return new_ticket
 
     async def update_ticket(
-        self, ticket_id: int, payload: CreateTicketPayload
-    ) -> TicketSchema:
+        self, ticket_id: int, payload: UpdateTicketPayload
+    ):
+        current_ticket = await self.get_ticket_by_id(ticket_id=ticket_id)
 
-        ticket: TicketSchema = (
-            await self.db.execute(
-                select(Ticket)
-                .where(
-                    Ticket.id == ticket_id,
-                    Ticket.fecha_eliminacion.is_(None)
-                )
-            )
-        ).scalar_one_or_none()
+        await self.db.execute(
+            update(Ticket)
+            .where(Ticket.id == ticket_id)
+            .values(**payload.dict(exclude_none=True))
+        )
 
-        if ticket:
-            for field, value in payload:
-                setattr(ticket, field, value)
-            await self.db.commit()
+        await self.db.commit()
 
-        return ticket
+        return current_ticket.id
 
     async def get_ticket_by_id(self, ticket_id: int) -> TicketSchema:
 

@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from typing import Optional
+from typing import Optional, Union
 from pydantic import parse_obj_as
 
 from app.repositories.ticket import TicketRepository
@@ -53,15 +53,18 @@ class TicketService(ServiceLayer):
 
         return parse_obj_as(TicketSchema, ticket) if ticket else None
 
-    async def update_ticket(self, ticket_id: int, payload: UpdateTicketPayload):
+    async def update_ticket(self,
+                            ticket_id: int,
+                            payload: UpdateTicketPayload
+                            ):
 
         ticket_repo = TicketRepository(db=self.db)
 
         # TBD: Deberiamos llamar a método para almacenar historial
 
-        ticket = await ticket_repo.update_ticket(ticket_id=ticket_id, payload=payload)
+        ticket_id = await ticket_repo.update_ticket(ticket_id=ticket_id, payload=payload)
 
-        return parse_obj_as(TicketSchema, ticket) if ticket else None
+        return ticket_id
 
     async def get_ticket_by_id(self, ticket_id: int):
 

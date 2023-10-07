@@ -82,23 +82,23 @@ async def update_ticket(
             status_code=status.HTTP_404_NOT_FOUND,
             detail={"error": "Usuario no encontrado"},
         )
-    if usuario.rol not in ["administrador", "editor"]:
+    if usuario.rol == "lector":
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail={"error": "Usuario no autorizado"},
         )
 
-    ticket = await ticket_service.update_ticket(
+    ticket_id = await ticket_service.update_ticket(
         ticket_id=ticket_id,
         payload=payload
     )
-    if not ticket:
+    if not ticket_id:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail={"error": "Ticket no encontrado"},
         )
 
-    return ticket
+    return f"Ticket con id={ticket_id} ha sido modificado"
 
 
 @router.delete("/{ticket_id}/")

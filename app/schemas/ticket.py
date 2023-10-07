@@ -71,7 +71,7 @@ class UpdateTicketPayload(BaseModel):
 
     tecnico_asignado_id: int = None
 
-    estado: str = None
+    estado: Optional[EstadoTicket]
     descripcion: str = None
     archivos: str = None
 
@@ -114,16 +114,16 @@ class TicketSchema(BaseModel):
     area_solicitante: int = None
     piso_solicitante: str = None
 
-    referencia: str
+    referencia: str = None
     area_asignada_id: int
-    tecnico_asignado_id: int
+    tecnico_asignado_id: int = None
 
     prioridad: PrioridadTicket
     estado: EstadoTicket
 
-    descripcion: str
+    descripcion: str = None
 
-    pre_tarea: str
+    pre_tarea: str = None
 
     archivos: str = None
 
