@@ -19,6 +19,18 @@ class UsuarioRepository(BaseRepository):
     """ "
     Repository to handle CRUD operations on Usuario model
     """
+    async def get_all_users(self) -> list[Usuario]:
+        users: list[Usuario] = (
+            (
+                await self.db.execute(
+                    select(Usuario).where(Usuario.fecha_eliminacion.is_(None))
+                )
+            )
+            .scalars()
+            .all()
+        )
+
+        return users
 
     async def get_user_by_field(
         self, field: EUSerField, value: Union[str, int]
@@ -38,14 +50,14 @@ class UsuarioRepository(BaseRepository):
     async def get_users_list(
         self,
         area_id: int,
-        rol: RolUsuario,
+        rol: Optional[RolUsuario],
     ) -> list[Usuario]:
         query = select(Usuario).where(
             Usuario.area_id == area_id,
             Usuario.fecha_eliminacion.is_(None),
         )
 
-        if rol is not None:
+        if rol:
             query = query.where(Usuario.rol == rol)
 
         users: list[Usuario] = (

@@ -26,10 +26,16 @@ class UsuarioService(ServiceLayer):
 
         return parse_obj_as(UsuarioSchema, usuario) if usuario else None
 
+    async def get_all_users(self) -> list[UsuarioSchema]:
+        repo = UsuarioRepository(db=self.db)
+        users = await repo.get_all_users()
+
+        return parse_obj_as(list[UsuarioSchema], users) if users else []
+
     async def get_users_list(
         self,
         area_id: int,
-        rol: RolUsuario,
+        rol: Optional[RolUsuario],
     ) -> Optional[UsuarioSchema]:
         repo = UsuarioRepository(db=self.db)
         users = await repo.get_users_list(area_id=area_id, rol=rol)

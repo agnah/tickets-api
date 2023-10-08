@@ -77,6 +77,7 @@ class UpdateTicketPayload(BaseModel):
 
     tecnico_asignado_id: int = None
 
+    prioridad: Optional[PrioridadTicket]
     estado: Optional[EstadoTicket]
     descripcion: str = None
     archivos: str = None

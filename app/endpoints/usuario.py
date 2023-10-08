@@ -15,10 +15,25 @@ from app.services.usuario import UsuarioService
 router = APIRouter()
 
 
-@router.get("/list/")
-async def get_users_list(
-    area_id: int = Query(..., description="ID del área"),
-    rol: RolUsuario = Query(None, description="Rol del usuario"),
+@router.get("/all/")
+async def get_all_users(
+    usuario_service: UsuarioService = Depends(get_usuario_service),
+) -> list[UsuarioSchema]:
+    users = await usuario_service.get_all_users()
+
+    if not users:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"error": "Usuarios no encontrados"},
+        )
+
+    return users
+
+
+@router.get("/{area_id}/")
+async def get_users_por_area_filtrando_por_rol(
+    area_id: int,
+    rol: RolUsuario = Query(None, description="Rol del usuario que se desea filtrar"),
     usuario_service: UsuarioService = Depends(get_usuario_service),
 ) -> list[UsuarioSchema]:
     users = await usuario_service.get_users_list(area_id=area_id, rol=rol)
@@ -26,7 +41,7 @@ async def get_users_list(
     if not users:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail={"error": "Usuarios no encontrados"},
+            detail={"error":f"No se encontraron usuarios con ese {rol} para esa el area con id={area_id}"},
         )
 
     return users
