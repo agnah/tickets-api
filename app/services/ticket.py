@@ -1,21 +1,26 @@
 from datetime import datetime, timedelta
-from typing import Optional, Union
+
 from pydantic import parse_obj_as
 
 from app.repositories.ticket import TicketRepository
 from app.schemas.area import TareaAreaSchema
-from app.schemas.ticket import AddTareaTicketPayload, CreateTicketPayload, ETicketField, EstadoTicket, TicketSchema, TicketTareaSchema, UpdateTicketPayload
+from app.schemas.ticket import (
+    AddTareaTicketPayload,
+    CreateTicketPayload,
+    EstadoTicket,
+    ETicketField,
+    TicketSchema,
+    TicketTareaSchema,
+    UpdateTicketPayload,
+)
 from app.services.area import AreaService
-from .layer import register_service, ServiceLayer
+
+from .layer import ServiceLayer, register_service
 
 
 @register_service("Ticket")
 class TicketService(ServiceLayer):
-
-    async def get_last_ten_days_tickets(
-        self
-    ):
-
+    async def get_last_ten_days_tickets(self):
         repo = TicketRepository(db=self.db)
         tickets = await repo.get_last_ten_days_tickets()
 
@@ -30,21 +35,22 @@ class TicketService(ServiceLayer):
         field: ETicketField = None,
         value: str = None,
         start_date: datetime = None,
-        end_date: datetime = None
+        end_date: datetime = None,
     ):
-
         repo = TicketRepository(db=self.db)
         tickets = await repo.get_tickets_by_field_in_date_range(
-            field=field,
-            value=value,
-            start_date=start_date,
-            end_date=end_date
+            field=field, value=value, start_date=start_date, end_date=end_date
         )
 
         return parse_obj_as(list[TicketSchema], tickets) if tickets else []
 
-    async def create_new_ticket(self, payload: CreateTicketPayload):
+    async def get_tareas_by_ticket_id(self, ticket_id: int):
+        ticket_repo = TicketRepository(db=self.db)
+        tareas = await ticket_repo.get_tareas_by_ticket_id(ticket_id=ticket_id)
 
+        return parse_obj_as(list[TicketTareaSchema], tareas) if tareas else []
+
+    async def create_new_ticket(self, payload: CreateTicketPayload):
         ticket_repo = TicketRepository(db=self.db)
         area_service: AreaService = self.get_service("Area")
         area = await area_service.get_area_by_id(area_id=payload.area_asignada_id)
@@ -55,35 +61,30 @@ class TicketService(ServiceLayer):
 
         return parse_obj_as(TicketSchema, ticket) if ticket else None
 
-    async def update_ticket(self,
-                            ticket_id: int,
-                            payload: UpdateTicketPayload
-                            ):
-
+    async def update_ticket(self, ticket_id: int, payload: UpdateTicketPayload):
         ticket_repo = TicketRepository(db=self.db)
 
         # TBD: Deberiamos llamar a método para almacenar historial
 
-        ticket_id = await ticket_repo.update_ticket(ticket_id=ticket_id, payload=payload)
+        ticket_id = await ticket_repo.update_ticket(
+            ticket_id=ticket_id, payload=payload
+        )
 
         return ticket_id
 
     async def get_ticket_by_id(self, ticket_id: int):
-
         repo = TicketRepository(db=self.db)
         ticket = await repo.get_ticket_by_id(ticket_id=ticket_id)
 
         return parse_obj_as(TicketSchema, ticket) if ticket else None
 
     async def anular_ticket(self, ticket_id: int):
-
         repo = TicketRepository(db=self.db)
         ticket = await repo.anular_ticket_by_id(ticket_id=ticket_id)
 
         return parse_obj_as(TicketSchema, ticket) if ticket else None
 
     async def actualizar_estado_ticket(self, ticket_id: int, estado: EstadoTicket):
-
         repo = TicketRepository(db=self.db)
 
         # TBD: Deberiamos llamar a método para almacenar historial
@@ -92,10 +93,7 @@ class TicketService(ServiceLayer):
 
         return parse_obj_as(TicketSchema, ticket) if ticket else None
 
-    async def derivar_ticket(
-        self, ticket_id: int, area_id: int
-    ):
-
+    async def derivar_ticket(self, ticket_id: int, area_id: int):
         repo = TicketRepository(db=self.db)
 
         # TBD: Deberiamos llamar a método para almacenar historial
@@ -104,29 +102,25 @@ class TicketService(ServiceLayer):
 
         return parse_obj_as(TicketSchema, ticket) if ticket else None
 
-    async def agregar_tarea(
-        self, ticket: TicketSchema, tarea: TareaAreaSchema
-    ):
-
+    async def agregar_tarea(self, ticket: TicketSchema, tarea: TareaAreaSchema):
         repo = TicketRepository(db=self.db)
 
         # TBD: Deberiamos llamar a método para almacenar historial
         payload = AddTareaTicketPayload(
             ticket_id=ticket.id,
             tarea_id=tarea.id,
-            tecnico_id=ticket.tecnico_asignado_id
+            tecnico_id=ticket.tecnico_asignado_id,
         )
 
-        ticket_tarea_relacion = await repo.agregar_tarea(
-            payload=payload
+        ticket_tarea_relacion = await repo.agregar_tarea(payload=payload)
+
+        return (
+            parse_obj_as(TicketTareaSchema, ticket_tarea_relacion)
+            if ticket_tarea_relacion
+            else None
         )
 
-        return parse_obj_as(TicketTareaSchema, ticket_tarea_relacion) if ticket_tarea_relacion else None
-
-    async def finalizar_tarea(
-        self, ticket_id: int, tarea_id: int
-    ):
-
+    async def finalizar_tarea(self, ticket_id: int, tarea_id: int):
         repo = TicketRepository(db=self.db)
 
         # TBD: Deberiamos llamar a método para almacenar historial
@@ -134,4 +128,8 @@ class TicketService(ServiceLayer):
             ticket_id=ticket_id, tarea_id=tarea_id
         )
 
-        return parse_obj_as(TicketTareaSchema, ticket_tarea_relacion) if ticket_tarea_relacion else None
+        return (
+            parse_obj_as(TicketTareaSchema, ticket_tarea_relacion)
+            if ticket_tarea_relacion
+            else None
+        )
