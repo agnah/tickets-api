@@ -54,8 +54,8 @@ class CreateTicketPayload(BaseModel):
     area_asignada_id: int
     tecnico_asignado_id: int = None
 
-    prioridad: PrioridadTicket = PrioridadTicket.BAJA
-    estado: str = EstadoTicket.PENDIENTE
+    prioridad: Optional[PrioridadTicket] = PrioridadTicket.BAJA
+    estado: Optional[EstadoTicket] = EstadoTicket.PENDIENTE
 
     descripcion: str
 
