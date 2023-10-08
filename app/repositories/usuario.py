@@ -40,14 +40,18 @@ class UsuarioRepository(BaseRepository):
         area_id: int,
         rol: RolUsuario,
     ) -> list[Usuario]:
+        query = select(Usuario).where(
+            Usuario.area_id == area_id,
+            Usuario.fecha_eliminacion.is_(None),
+        )
+
+        if rol is not None:
+            query = query.where(Usuario.rol == rol)
+
         users: list[Usuario] = (
             (
                 await self.db.execute(
-                    select(Usuario).where(
-                        Usuario.area_id == area_id,
-                        Usuario.rol == rol,
-                        Usuario.fecha_eliminacion.is_(None),
-                    )
+                    query,
                 )
             )
             .scalars()

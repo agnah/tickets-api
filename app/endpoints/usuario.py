@@ -18,7 +18,7 @@ router = APIRouter()
 @router.get("/list/")
 async def get_users_list(
     area_id: int = Query(..., description="ID del área"),
-    rol: RolUsuario = Query(..., description="Rol del usuario"),
+    rol: RolUsuario = Query(None, description="Rol del usuario"),
     usuario_service: UsuarioService = Depends(get_usuario_service),
 ) -> list[UsuarioSchema]:
     users = await usuario_service.get_users_list(area_id=area_id, rol=rol)
