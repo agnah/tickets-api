@@ -174,7 +174,7 @@ class TicketRepository(BaseRepository):
 
         return ticket
 
-    async def agregar_tarea(self, payload: AddTareaTicketPayload) -> TicketTareaSchema:
+    async def agregar_tarea(self, payload: AddTareaTicketPayload):
         ticket_tarea = TicketTareaRelacion(**payload.dict())
         self.db.add(ticket_tarea)
         await self.db.commit()

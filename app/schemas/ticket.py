@@ -4,7 +4,7 @@ from typing import Optional
 
 from pydantic import BaseModel
 
-from app.schemas.area import AreaSchema, AreasSolicitante
+from app.schemas.area import AreaSchema, AreasSolicitante, TareaAreaSchema
 from app.schemas.usuario import UsuarioSchema
 
 
@@ -108,6 +108,9 @@ class TicketTareaSchema(BaseModel):
 
     class Config:
         orm_mode = True
+
+class EnrichedTicketTareaSchema(TicketTareaSchema):
+    tarea: TareaAreaSchema
 
 
 class TicketSchema(BaseModel):

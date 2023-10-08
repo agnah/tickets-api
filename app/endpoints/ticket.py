@@ -208,12 +208,6 @@ async def agregar_tarea(
             detail={"error": "Usuario no encontrado"},
         )
 
-    if usuario.id != ticket.tecnico_asignado_id:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail={"error": "Usuario no autorizado a agregar tareas a este ticket"},
-        )
-
     ticket = await ticket_service.get_ticket_by_id(ticket_id=ticket_id)
     if not ticket:
         raise HTTPException(
@@ -221,11 +215,18 @@ async def agregar_tarea(
             detail={"error": "Ticket no encontrado"},
         )
 
+    if usuario.id != ticket.tecnico_asignado_id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"error": "Usuario no autorizado a agregar tareas a este ticket"},
+        )
+
     area_tareas = await area_service.get_all_tareas_by_area_id(
         area_id=ticket.area_asignada_id
     )
     tarea_a_agregar = next(
-        (area_tarea for area_tarea in area_tareas if (area_tarea.tarea).upper() == (tarea.upper())), None
+        (area_tarea for area_tarea in area_tareas if (
+            area_tarea.tarea).upper() == (tarea.upper())), None
     )
     if not tarea_a_agregar:
         raise HTTPException(

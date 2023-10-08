@@ -8,6 +8,7 @@ from app.schemas.ticket import (
     AddTareaTicketPayload,
     CreateTicketPayload,
     EnrichedTicketSchema,
+    EnrichedTicketTareaSchema,
     EstadoTicket,
     ETicketField,
     TicketSchema,
@@ -139,10 +140,15 @@ class TicketService(ServiceLayer):
 
         ticket_tarea_relacion = await repo.agregar_tarea(payload=payload)
 
-        return (
-            parse_obj_as(TicketTareaSchema, ticket_tarea_relacion)
-            if ticket_tarea_relacion
-            else None
+        if not ticket_tarea_relacion:
+            return None
+
+        ticket_tarea_relacion_data = parse_obj_as(
+            TicketTareaSchema, ticket_tarea_relacion)
+
+        return EnrichedTicketTareaSchema(
+            **ticket_tarea_relacion_data.dict(),
+            tarea=tarea
         )
 
     async def finalizar_tarea(self, ticket_id: int, tarea_id: int):
