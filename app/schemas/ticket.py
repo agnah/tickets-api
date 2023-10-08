@@ -1,11 +1,10 @@
 from datetime import datetime
-
 from enum import Enum
 from typing import Optional
 
 from pydantic import BaseModel
 
-from app.schemas.area import AreasSolicitante, EPreTareas
+from app.schemas.area import AreasSolicitante
 
 
 class ETicketField(str, Enum):
@@ -117,6 +116,7 @@ class TicketSchema(BaseModel):
     nombre_solicitante: str = None
     telefono_solicitante: str = None
     celular_solicitante: str = None
+    sede_solicitante: Optional[ESede] = ESede.NUEVE_DE_JULIO
     area_solicitante: Optional[AreasSolicitante] = AreasSolicitante.ADMINISTRACION
     piso_solicitante: str = None
 
