@@ -11,6 +11,7 @@ from app.dependencies.service import (
 )
 from app.schemas.ticket import (
     CreateTicketPayload,
+    EnrichedTicketSchema,
     EstadoTicket,
     ETicketField,
     TicketSchema,
@@ -30,7 +31,7 @@ async def get_last_ten_days_tickets_by_user(
     token: str = Header(Required, alias="X-Token"),
     usuario_service: UsuarioService = Depends(get_usuario_service),
     tickets_service: TicketService = Depends(get_ticket_service),
-) -> list[TicketSchema]:
+) -> list[EnrichedTicketSchema]:
     user = await usuario_service.get_user_by_field(field=EUSerField.TOKEN, value=token)
 
     if not user:
@@ -40,7 +41,8 @@ async def get_last_ten_days_tickets_by_user(
         )
 
     tickets = await tickets_service.get_last_ten_days_tickets()
-    return tickets
+    enriched_tickets = await tickets_service.enriching_tickets(tickets=tickets)
+    return enriched_tickets
 
 
 @router.get("/")
@@ -52,7 +54,7 @@ async def get_tickets_by_field(
     end_date: datetime = None,
     usuario_service: UsuarioService = Depends(get_usuario_service),
     tickets_service: TicketService = Depends(get_ticket_service),
-) -> list[TicketSchema]:
+) -> list[EnrichedTicketSchema]:
     user = await usuario_service.get_user_by_field(field=EUSerField.TOKEN, value=token)
 
     if not user:
@@ -65,7 +67,9 @@ async def get_tickets_by_field(
         field=field, value=value, start_date=start_date, end_date=end_date
     )
 
-    return tickets
+    enriched_tickets = await tickets_service.enriching_tickets(tickets=tickets)
+
+    return enriched_tickets
 
 
 @router.post("/")

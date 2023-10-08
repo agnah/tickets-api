@@ -4,7 +4,8 @@ from typing import Optional
 
 from pydantic import BaseModel
 
-from app.schemas.area import AreasSolicitante
+from app.schemas.area import AreaSchema, AreasSolicitante
+from app.schemas.usuario import UsuarioSchema
 
 
 class ETicketField(str, Enum):
@@ -141,3 +142,9 @@ class TicketSchema(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class EnrichedTicketSchema(TicketSchema):
+    tareas: list[TicketTareaSchema] = []
+    tecnico: UsuarioSchema = None
+    area: AreaSchema

@@ -34,12 +34,13 @@ class UsuarioSchema(BaseModel):
     nombre: str
     apellido: str
     email: str
-    celular: str
-    telefono: str
-    interno: str
+    celular: str = None
+    telefono: str = None
+    interno: str = None
 
     area_id: int
-    piso: str
+    sede: str
+    piso: str = None
 
     perfil: PerfilUsuario
     rol: RolUsuario

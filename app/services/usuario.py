@@ -22,9 +22,9 @@ class UsuarioService(ServiceLayer):
         value: Union[str, int],
     ) -> Optional[UsuarioSchema]:
         repo = UsuarioRepository(db=self.db)
-        user = await repo.get_user_by_field(field=field, value=value)
+        usuario = await repo.get_user_by_field(field=field, value=value)
 
-        return parse_obj_as(UsuarioSchema, user) if user else None
+        return parse_obj_as(UsuarioSchema, usuario) if usuario else None
 
     async def get_users_list(
         self,

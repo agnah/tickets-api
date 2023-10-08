@@ -3,17 +3,20 @@ from datetime import datetime, timedelta
 from pydantic import parse_obj_as
 
 from app.repositories.ticket import TicketRepository
-from app.schemas.area import TareaAreaSchema
+from app.schemas.area import EAreaField, TareaAreaSchema
 from app.schemas.ticket import (
     AddTareaTicketPayload,
     CreateTicketPayload,
+    EnrichedTicketSchema,
     EstadoTicket,
     ETicketField,
     TicketSchema,
     TicketTareaSchema,
     UpdateTicketPayload,
 )
+from app.schemas.usuario import EUSerField
 from app.services.area import AreaService
+from app.services.usuario import UsuarioService
 
 from .layer import ServiceLayer, register_service
 
@@ -29,6 +32,28 @@ class TicketService(ServiceLayer):
                 ticket.demorado = True
 
         return parse_obj_as(list[TicketSchema], tickets) if tickets else []
+
+    async def enriching_tickets(self, tickets: list[TicketSchema]) -> list[EnrichedTicketSchema]:
+
+        usuario_service: UsuarioService = self.get_service("Usuario")
+        area_service: AreaService = self.get_service("Area")
+
+        enriched_tickets = []
+        for ticket in tickets:
+            tecnico = await usuario_service.get_user_by_field(field=EUSerField.ID, value=ticket.tecnico_asignado_id)
+            area = await area_service.get_area_by_field(field=EAreaField.ID, value=ticket.area_asignada_id)
+            tareas = await self.get_tareas_by_ticket_id(ticket_id=ticket.id)
+
+            enriched_ticket = EnrichedTicketSchema(
+                **ticket.dict(),
+                tecnico=tecnico,
+                area=area,
+                tareas=tareas
+            )
+
+            enriched_tickets.append(enriched_ticket)
+
+        return enriched_tickets
 
     async def get_tickets_by_field_in_date_range(
         self,
