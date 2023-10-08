@@ -68,34 +68,6 @@ async def get_tickets_by_field(
     return tickets
 
 
-@router.get("/tareas/{ticket_id}/")
-async def get_tareas_by_ticket_id(
-    ticket_id: int,
-    token: str = Header(Required, alias="X-Token"),
-    usuario_service: UsuarioService = Depends(get_usuario_service),
-    tickets_service: TicketService = Depends(get_ticket_service),
-) -> list[TicketTareaSchema]:
-    user = await usuario_service.get_user_by_field(field=EUSerField.TOKEN, value=token)
-
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail={"error": "Usuario no encontrado"},
-        )
-
-    ticket = await tickets_service.get_tareas_by_ticket_id(ticket_id=ticket_id)
-
-    if not ticket:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail={"error": "Ticket no encontrado"},
-        )
-
-    ticket_tareas = await tickets_service.get_ticket_tareas(ticket=ticket)
-
-    return ticket_tareas
-
-
 @router.post("/")
 async def create_new_ticket(
     payload: CreateTicketPayload,
@@ -258,6 +230,34 @@ async def agregar_tarea(
     )
 
     return ticket_tarea_relation
+
+
+@router.get("/tareas/{ticket_id}/")
+async def get_tareas_by_ticket_id(
+    ticket_id: int,
+    token: str = Header(Required, alias="X-Token"),
+    usuario_service: UsuarioService = Depends(get_usuario_service),
+    tickets_service: TicketService = Depends(get_ticket_service),
+) -> list[TicketTareaSchema]:
+    user = await usuario_service.get_user_by_field(field=EUSerField.TOKEN, value=token)
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"error": "Usuario no encontrado"},
+        )
+
+    ticket = await tickets_service.get_tareas_by_ticket_id(ticket_id=ticket_id)
+
+    if not ticket:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"error": "Ticket no encontrado"},
+        )
+
+    ticket_tareas = await tickets_service.get_tareas_by_ticket_id(ticket_id=ticket_id)
+
+    return ticket_tareas
 
 
 @router.patch("/{ticket_id}/tareas/{tarea_id}/")
