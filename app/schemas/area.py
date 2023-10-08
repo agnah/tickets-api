@@ -1,5 +1,6 @@
 from datetime import datetime
 from enum import Enum
+from typing import Optional
 
 from pydantic import BaseModel
 
@@ -49,6 +50,23 @@ class TareaAreaSchema(BaseModel):
     fecha_creacion: datetime
     fecha_modificacion: datetime
     fecha_eliminacion: datetime = None
+
+    class Config:
+        orm_mode = True
+
+
+class TareaAreaResponse(BaseModel):
+    id: int
+    tarea: str
+
+    class Config:
+        orm_mode = True
+
+
+class AreaResponse(BaseModel):
+    id: int
+    nombre: AreaAsignar
+    tareas: Optional[list[TareaAreaResponse]] = []
 
     class Config:
         orm_mode = True

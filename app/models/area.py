@@ -1,8 +1,7 @@
-from sqlalchemy import Column, Enum, String, func, DateTime, ForeignKey
+from sqlalchemy import Column, DateTime, Enum, ForeignKey, String, func
 from sqlalchemy.orm import relationship
 
 from app.schemas.area import AreaAsignar
-
 
 from .base import Base, UnsignedInt
 
@@ -17,8 +16,11 @@ class Area(Base):
 
     fecha_creacion = Column(DateTime, server_default=func.now())
     fecha_modificacion = Column(
-        DateTime, server_default=func.now(), server_onupdate=func.now())
+        DateTime, server_default=func.now(), server_onupdate=func.now()
+    )
     fecha_eliminacion = Column(DateTime, default=None)
+
+    tareas = relationship("TareaAreaRelacion", back_populates="area")
 
 
 class TareaAreaRelacion(Base):
@@ -31,7 +33,8 @@ class TareaAreaRelacion(Base):
 
     fecha_creacion = Column(DateTime, server_default=func.now())
     fecha_modificacion = Column(
-        DateTime, server_default=func.now(), server_onupdate=func.now())
+        DateTime, server_default=func.now(), server_onupdate=func.now()
+    )
     fecha_eliminacion = Column(DateTime, default=None)
 
-    area = relationship("Area")
+    area = relationship("Area", back_populates="tareas", overlaps="tareas")
