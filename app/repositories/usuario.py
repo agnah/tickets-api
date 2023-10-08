@@ -6,7 +6,12 @@ from sqlalchemy.orm import InstrumentedAttribute
 
 from app.models.usuario import Usuario
 from app.repositories.base import BaseRepository
-from app.schemas.usuario import CreateUsuarioPayload, EUSerField, UpdateUsuarioPayload
+from app.schemas.usuario import (
+    CreateUsuarioPayload,
+    EUSerField,
+    RolUsuario,
+    UpdateUsuarioPayload,
+)
 
 
 @define
@@ -30,11 +35,19 @@ class UsuarioRepository(BaseRepository):
 
         return user
 
-    async def get_users_list(self) -> list[Usuario]:
+    async def get_users_list(
+        self,
+        area_id: int,
+        rol: RolUsuario,
+    ) -> list[Usuario]:
         users: list[Usuario] = (
             (
                 await self.db.execute(
-                    select(Usuario).where(Usuario.fecha_eliminacion.is_(None))
+                    select(Usuario).where(
+                        Usuario.area_id == area_id,
+                        Usuario.rol == rol,
+                        Usuario.fecha_eliminacion.is_(None),
+                    )
                 )
             )
             .scalars()

@@ -6,6 +6,7 @@ from app.repositories.usuario import UsuarioRepository
 from app.schemas.usuario import (
     CreateUsuarioPayload,
     EUSerField,
+    RolUsuario,
     UpdateUsuarioPayload,
     UsuarioSchema,
 )
@@ -25,9 +26,13 @@ class UsuarioService(ServiceLayer):
 
         return parse_obj_as(UsuarioSchema, user) if user else None
 
-    async def get_users_list(self) -> Optional[UsuarioSchema]:
+    async def get_users_list(
+        self,
+        area_id: int,
+        rol: RolUsuario,
+    ) -> Optional[UsuarioSchema]:
         repo = UsuarioRepository(db=self.db)
-        users = await repo.get_users_list()
+        users = await repo.get_users_list(area_id=area_id, rol=rol)
 
         return parse_obj_as(list[UsuarioSchema], users) if users else []
 

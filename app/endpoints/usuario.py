@@ -1,11 +1,12 @@
 from typing import Union
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from app.dependencies.service import get_usuario_service
 from app.schemas.usuario import (
     CreateUsuarioPayload,
     EUSerField,
+    RolUsuario,
     UpdateUsuarioPayload,
     UsuarioSchema,
 )
@@ -16,9 +17,11 @@ router = APIRouter()
 
 @router.get("/list/")
 async def get_users_list(
+    area_id: int = Query(..., description="ID del área"),
+    rol: RolUsuario = Query(..., description="Rol del usuario"),
     usuario_service: UsuarioService = Depends(get_usuario_service),
 ) -> list[UsuarioSchema]:
-    users = await usuario_service.get_users_list()
+    users = await usuario_service.get_users_list(area_id=area_id, rol=rol)
 
     if not users:
         raise HTTPException(
