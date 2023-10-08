@@ -66,7 +66,7 @@ class CreateTicketPayload(BaseModel):
 
 
 class UpdateTicketPayload(BaseModel):
-    nombre_solictante: str = None
+    nombre_solicitante: str = None
     telefono_solicitante: str = None
     celular_solicitante: str = None
     area_solicitante: str = None
