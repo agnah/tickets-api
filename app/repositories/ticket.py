@@ -29,9 +29,11 @@ class TicketRepository(BaseRepository):
         tickets: list[TicketSchema] = (
             (
                 await self.db.execute(
-                    select(Ticket).where(
+                    select(Ticket)
+                    .where(
                         Ticket.fecha_creacion >= datetime.now() - timedelta(days=10),
                     )
+                    .order_by(Ticket.prioridad.asc())
                 )
             )
             .scalars()
@@ -62,7 +64,11 @@ class TicketRepository(BaseRepository):
                 Ticket.fecha_creacion >= datetime.now() - timedelta(days=30)
             )
 
-        tickets: list[TicketSchema] = (await self.db.execute(query)).scalars().all()
+        tickets: list[TicketSchema] = (
+            (await self.db.execute(query.order_by(Ticket.prioridad.asc())))
+            .scalars()
+            .all()
+        )
 
         return tickets
 
