@@ -31,7 +31,6 @@ class TicketRepository(BaseRepository):
                 await self.db.execute(
                     select(Ticket).where(
                         Ticket.fecha_creacion >= datetime.now() - timedelta(days=10),
-                        Ticket.fecha_eliminacion.is_(None),
                     )
                 )
             )
@@ -48,9 +47,7 @@ class TicketRepository(BaseRepository):
         start_date: datetime = None,
         end_date: datetime = None,
     ) -> list[TicketSchema]:
-        query = select(Ticket).where(
-            Ticket.fecha_eliminacion.is_(None),
-        )
+        query = select(Ticket)
 
         if field and value:
             column: InstrumentedAttribute = getattr(Ticket, field)
@@ -110,11 +107,7 @@ class TicketRepository(BaseRepository):
 
     async def get_ticket_by_id(self, ticket_id: int) -> TicketSchema:
         ticket: TicketSchema = (
-            await self.db.execute(
-                select(Ticket).where(
-                    Ticket.id == ticket_id, Ticket.fecha_eliminacion.is_(None)
-                )
-            )
+            await self.db.execute(select(Ticket).where(Ticket.id == ticket_id))
         ).scalar_one_or_none()
 
         return ticket
