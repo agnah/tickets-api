@@ -106,7 +106,7 @@ async def update_ticket(
             detail={"error": "Ticket no encontrado"},
         )
 
-    return f"Ticket con id={ticket_id} ha sido modificado"
+    return f"El ticket con id={ticket_id} ha sido actualizado."
 
 
 @router.delete("/{ticket_id}/")
@@ -215,18 +215,24 @@ async def agregar_tarea(
             detail={"error": "Ticket no encontrado"},
         )
 
+    """
     if usuario.id != ticket.tecnico_asignado_id:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail={"error": "Usuario no autorizado a agregar tareas a este ticket"},
         )
+    """
 
     area_tareas = await area_service.get_all_tareas_by_area_id(
         area_id=ticket.area_asignada_id
     )
     tarea_a_agregar = next(
-        (area_tarea for area_tarea in area_tareas if (
-            area_tarea.tarea).upper() == (tarea.upper())), None
+        (
+            area_tarea
+            for area_tarea in area_tareas
+            if (area_tarea.tarea).upper() == (tarea.upper())
+        ),
+        None,
     )
     if not tarea_a_agregar:
         raise HTTPException(
