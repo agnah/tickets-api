@@ -19,6 +19,7 @@ class UsuarioRepository(BaseRepository):
     """ "
     Repository to handle CRUD operations on Usuario model
     """
+
     async def get_all_users(self) -> list[Usuario]:
         users: list[Usuario] = (
             (

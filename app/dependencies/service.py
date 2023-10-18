@@ -1,7 +1,6 @@
 from typing import Callable, Type
 
 from fastapi import Depends
-from app.services.usuario import UsuarioService
 from app.services.login import LoginService
 
 from app.models import SessionLocal as TicketsSessionLocal
