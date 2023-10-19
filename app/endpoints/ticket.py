@@ -255,7 +255,7 @@ async def get_tareas_by_ticket_id(
     token: str = Header(Required, alias="X-Token"),
     usuario_service: UsuarioService = Depends(get_usuario_service),
     tickets_service: TicketService = Depends(get_ticket_service),
-) -> list[TicketTareaSchema]:
+) -> list[EnrichedTicketSchema]:
     user = await usuario_service.get_user_by_field(field=EUSerField.TOKEN, value=token)
 
     if not user:
@@ -264,7 +264,7 @@ async def get_tareas_by_ticket_id(
             detail={"error": "Usuario no encontrado"},
         )
 
-    ticket = await tickets_service.get_tareas_by_ticket_id(ticket_id=ticket_id)
+    ticket = await tickets_service.get_ticket_by_id(ticket_id=ticket_id)
 
     if not ticket:
         raise HTTPException(
@@ -272,9 +272,10 @@ async def get_tareas_by_ticket_id(
             detail={"error": "Ticket no encontrado"},
         )
 
-    ticket_tareas = await tickets_service.get_tareas_by_ticket_id(ticket_id=ticket_id)
+    enriched_ticket = await tickets_service.enriching_tickets(tickets=[ticket])
 
-    return ticket_tareas
+
+    return enriched_ticket
 
 
 @router.patch("/{ticket_id}/tareas/{tarea_id}/")

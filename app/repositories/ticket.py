@@ -78,7 +78,7 @@ class TicketRepository(BaseRepository):
                 await self.db.execute(
                     select(TicketTareaRelacion).where(
                         TicketTareaRelacion.ticket_id == ticket_id,
-                        TicketTareaRelacion.fecha_eliminacion.is_(None),
+                        # TicketTareaRelacion.fecha_eliminacion.is_(None),
                     )
                 )
             )
@@ -144,7 +144,8 @@ class TicketRepository(BaseRepository):
         ticket: TicketSchema = (
             await self.db.execute(
                 select(Ticket).where(
-                    Ticket.id == ticket_id, Ticket.fecha_eliminacion.is_(None)
+                    Ticket.id == ticket_id,
+                    Ticket.fecha_eliminacion.is_(None)
                 )
             )
         ).scalar_one_or_none()
@@ -162,7 +163,8 @@ class TicketRepository(BaseRepository):
         ticket: TicketSchema = (
             await self.db.execute(
                 select(Ticket).where(
-                    Ticket.id == ticket_id, Ticket.fecha_eliminacion.is_(None)
+                    Ticket.id == ticket_id,
+                    Ticket.fecha_eliminacion.is_(None)
                 )
             )
         ).scalar_one_or_none()
