@@ -274,7 +274,6 @@ async def get_tareas_by_ticket_id(
 
     enriched_ticket = await tickets_service.enriching_tickets(tickets=[ticket])
 
-
     return enriched_ticket
 
 
@@ -307,3 +306,40 @@ async def finalizar_tarea(
     )
 
     return ticket_tarea_relation
+
+
+@router.delete("/{ticket_id}/tareas/{tarea_id}/")
+async def eliminar_tarea(
+    ticket_id: int,
+    tarea_id: int,
+    usuario_id: int = Header(Required, alias="X-Usuario"),
+    ticket_service: TicketService = Depends(get_ticket_service),
+    usuario_service: UsuarioService = Depends(get_usuario_service),
+) -> Optional[TicketTareaSchema]:
+    usuario = await usuario_service.get_user_by_field(
+        field=EUSerField.ID, value=usuario_id
+    )
+    if not usuario:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"error": "Usuario no encontrado"},
+        )
+
+    ticket = await ticket_service.get_ticket_by_id(ticket_id=ticket_id)
+    if not ticket:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"error": "Ticket no encontrado"},
+        )
+
+    tarea_eliminada_id = await ticket_service.eliminar_tarea(
+        ticket_id=ticket_id, tarea_id=tarea_id
+    )
+
+    if tarea_eliminada_id:
+        return f"La tarea con id={tarea_eliminada_id} ha sido eliminada del ticket con id={ticket_id}."
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"error": "Tarea no encontrada en el ticket"},
+        )

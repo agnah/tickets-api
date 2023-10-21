@@ -152,3 +152,16 @@ class EnrichedTicketSchema(TicketSchema):
     tareas: list[TicketTareaSchema] = []
     tecnico: UsuarioSchema = None
     area: AreaSchema
+
+class TicketHistorialSchema(BaseModel):
+    ticket_id: int = None
+    tarea_id: int = None
+    tecnico_id: int = None
+    estado: str = None
+
+    fecha_creacion: datetime
+    fecha_modificacion: datetime
+    fecha_eliminacion: datetime = None
+
+    class Config:
+        orm_mode = True

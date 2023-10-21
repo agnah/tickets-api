@@ -203,3 +203,21 @@ class TicketRepository(BaseRepository):
             await self.db.commit()
 
         return ticket_tarea
+
+    async def eliminar_tarea(self, ticket_id: int, tarea_id: int) -> TicketTareaSchema:
+        ticket_tarea: TicketTareaSchema = (
+            await self.db.execute(
+                select(TicketTareaRelacion).where(
+                    TicketTareaRelacion.ticket_id == ticket_id,
+                    TicketTareaRelacion.tarea_id == tarea_id,
+                    TicketTareaRelacion.fecha_eliminacion.is_(None),
+                )
+            )
+        ).scalar_one_or_none()
+
+        if ticket_tarea:
+            # Eliminar registro de la base de datos
+            await self.db.delete(ticket_tarea)
+            await self.db.commit()
+
+        return ticket_tarea.tarea_id if ticket_tarea else None
