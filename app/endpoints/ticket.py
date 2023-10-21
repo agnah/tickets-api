@@ -99,14 +99,14 @@ async def update_ticket(
             detail={"error": "Usuario no encontrado"},
         )
 
-    ticket_id = await ticket_service.update_ticket(ticket_id=ticket_id, payload=payload)
-    if not ticket_id:
+    updated_ticket = await ticket_service.update_ticket(ticket_id=ticket_id, payload=payload)
+    if not updated_ticket:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail={"error": "Ticket no encontrado"},
         )
 
-    return f"El ticket con id={ticket_id} ha sido actualizado."
+    return updated_ticket
 
 
 @router.delete("/{ticket_id}/")

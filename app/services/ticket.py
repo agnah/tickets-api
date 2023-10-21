@@ -99,7 +99,9 @@ class TicketService(ServiceLayer):
             ticket_id=ticket_id, payload=payload
         )
 
-        return ticket_id
+        updated_ticket = await self.get_ticket_by_id(ticket_id=ticket_id)
+
+        return updated_ticket
 
     async def get_ticket_by_id(self, ticket_id: int):
         repo = TicketRepository(db=self.db)

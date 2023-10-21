@@ -101,7 +101,7 @@ class TicketRepository(BaseRepository):
     async def update_ticket(self, ticket_id: int, payload: UpdateTicketPayload):
         current_ticket = await self.get_ticket_by_id(ticket_id=ticket_id)
 
-        if current_ticket.tecnico_asignado_id is None and payload.tecnico_asignado_id:
+        if (current_ticket.tecnico_asignado_id is None) and payload.tecnico_asignado_id:
             current_ticket.estado = EstadoTicket.EN_CURSO
 
         await self.db.execute(
