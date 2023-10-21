@@ -303,7 +303,7 @@ async def finalizar_tarea(
         )
 
     ticket_tarea_relation = await ticket_service.finalizar_tarea(
-        ticket=ticket, tarea_id=tarea_id
+        ticket_id=ticket_id, tarea_id=tarea_id
     )
 
     return ticket_tarea_relation
