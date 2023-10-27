@@ -109,6 +109,7 @@ class TicketTareaSchema(BaseModel):
     class Config:
         orm_mode = True
 
+
 class EnrichedTicketTareaSchema(TicketTareaSchema):
     tarea: TareaAreaSchema
 
@@ -153,6 +154,7 @@ class EnrichedTicketSchema(TicketSchema):
     tecnico: UsuarioSchema = None
     area: AreaSchema
 
+
 class TicketHistorialSchema(BaseModel):
     ticket_id: int = None
     tarea_id: int = None
@@ -162,6 +164,28 @@ class TicketHistorialSchema(BaseModel):
     fecha_creacion: datetime
     fecha_modificacion: datetime
     fecha_eliminacion: datetime = None
+
+    class Config:
+        orm_mode = True
+
+
+class TicketHistorialResponse(BaseModel):
+    sector: str
+    mensaje: str
+
+    fecha_modificacion: datetime
+
+    class Config:
+        orm_mode = True
+
+
+class CreateTicketHistorialPayload(BaseModel):
+    ticket_id: int
+    registro_anterior_id: int = None
+    area_anterior_id: int = None
+    tecnico_anterior_id: int = None
+    notas: str = None
+    creado_por_id: int
 
     class Config:
         orm_mode = True

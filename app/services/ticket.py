@@ -6,11 +6,13 @@ from app.repositories.ticket import TicketRepository
 from app.schemas.area import EAreaField, TareaAreaSchema
 from app.schemas.ticket import (
     AddTareaTicketPayload,
+    CreateTicketHistorialPayload,
     CreateTicketPayload,
     EnrichedTicketSchema,
     EnrichedTicketTareaSchema,
     EstadoTicket,
     ETicketField,
+    TicketHistorialResponse,
     TicketSchema,
     TicketTareaSchema,
     UpdateTicketPayload,
@@ -34,22 +36,24 @@ class TicketService(ServiceLayer):
 
         return parse_obj_as(list[TicketSchema], tickets) if tickets else []
 
-    async def enriching_tickets(self, tickets: list[TicketSchema]) -> list[EnrichedTicketSchema]:
-
+    async def enriching_tickets(
+        self, tickets: list[TicketSchema]
+    ) -> list[EnrichedTicketSchema]:
         usuario_service: UsuarioService = self.get_service("Usuario")
         area_service: AreaService = self.get_service("Area")
 
         enriched_tickets = []
         for ticket in tickets:
-            tecnico = await usuario_service.get_user_by_field(field=EUSerField.ID, value=ticket.tecnico_asignado_id)
-            area = await area_service.get_area_by_field(field=EAreaField.ID, value=ticket.area_asignada_id)
+            tecnico = await usuario_service.get_user_by_field(
+                field=EUSerField.ID, value=ticket.tecnico_asignado_id
+            )
+            area = await area_service.get_area_by_field(
+                field=EAreaField.ID, value=ticket.area_asignada_id
+            )
             tareas = await self.get_tareas_by_ticket_id(ticket_id=ticket.id)
 
             enriched_ticket = EnrichedTicketSchema(
-                **ticket.dict(),
-                tecnico=tecnico,
-                area=area,
-                tareas=tareas
+                **ticket.dict(), tecnico=tecnico, area=area, tareas=tareas
             )
 
             enriched_tickets.append(enriched_ticket)
@@ -155,11 +159,11 @@ class TicketService(ServiceLayer):
             return None
 
         ticket_tarea_relacion_data = parse_obj_as(
-            TicketTareaSchema, ticket_tarea_relacion)
+            TicketTareaSchema, ticket_tarea_relacion
+        )
 
         return EnrichedTicketTareaSchema(
-            **ticket_tarea_relacion_data.dict(),
-            tarea=tarea
+            **ticket_tarea_relacion_data.dict(), tarea=tarea
         )
 
     async def finalizar_tarea(self, ticket_id: int, tarea_id: int):
@@ -182,8 +186,34 @@ class TicketService(ServiceLayer):
 
         # TBD: Deberiamos llamar a método para almacenar historial
         # para registrar que el ticket se elimino y no perder este registro!
-        tarea_id = await repo.eliminar_tarea(
-            ticket_id=ticket_id, tarea_id=tarea_id
-        )
+        tarea_id = await repo.eliminar_tarea(ticket_id=ticket_id, tarea_id=tarea_id)
 
         return tarea_id if tarea_id else None
+
+    async def get_historial_by_ticket_id(self, ticket_id: int):
+        repo = TicketRepository(db=self.db)
+        historial = await repo.get_historial_by_ticket_id(ticket_id=ticket_id)
+
+        return (
+            parse_obj_as(list[TicketHistorialResponse], historial) if historial else []
+        )
+
+    async def agregar_historial(
+        self,
+        ticket_id: int,
+        payload: CreateTicketHistorialPayload,
+    ):
+        repo = TicketRepository(db=self.db)
+
+        historial = await repo.agregar_historial(payload=payload)
+
+        if not historial:
+            return None
+
+        ticket_historial = await repo.get_historial_by_ticket_id(ticket_id=ticket_id)
+
+        return (
+            parse_obj_as(list[TicketHistorialResponse], ticket_historial)
+            if ticket_historial
+            else []
+        )

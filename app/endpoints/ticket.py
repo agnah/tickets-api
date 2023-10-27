@@ -10,6 +10,7 @@ from app.dependencies.service import (
     get_usuario_service,
 )
 from app.schemas.ticket import (
+    CreateTicketHistorialPayload,
     CreateTicketPayload,
     EnrichedTicketSchema,
     EstadoTicket,
@@ -99,7 +100,9 @@ async def update_ticket(
             detail={"error": "Usuario no encontrado"},
         )
 
-    updated_ticket = await ticket_service.update_ticket(ticket_id=ticket_id, payload=payload)
+    updated_ticket = await ticket_service.update_ticket(
+        ticket_id=ticket_id, payload=payload
+    )
     if not updated_ticket:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -319,6 +322,7 @@ async def eliminar_tarea(
     usuario = await usuario_service.get_user_by_field(
         field=EUSerField.ID, value=usuario_id
     )
+
     if not usuario:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -343,3 +347,46 @@ async def eliminar_tarea(
             status_code=status.HTTP_404_NOT_FOUND,
             detail={"error": "Tarea no encontrada en el ticket"},
         )
+
+
+@router.get("/{ticket_id}/historial")
+async def get_historial_by_ticket_id(
+    ticket_id: int,
+    ticket_service: TicketService = Depends(get_ticket_service),
+) -> list[EnrichedTicketSchema]:
+    historial = await ticket_service.get_historial_by_ticket_id(ticket_id=ticket_id)
+
+    if not historial:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"error": "Historial no encontrado"},
+        )
+
+    return historial
+
+
+@router.post("/{ticket_id}/historial")
+async def agregar_historial(
+    ticket_id: int,
+    payload: CreateTicketHistorialPayload,
+    ticket_service: TicketService = Depends(get_ticket_service),
+) -> list[EnrichedTicketSchema]:
+    ticket = await ticket_service.get_ticket_by_id(ticket_id=ticket_id)
+
+    if not ticket:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"error": "Ticket no encontrado"},
+        )
+
+    historial = await ticket_service.agregar_historial(
+        ticket_id=ticket_id, payload=payload
+    )
+
+    if not historial:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"error": "No se agrego el historial"},
+        )
+
+    return historial

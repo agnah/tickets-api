@@ -5,11 +5,13 @@ from sqlalchemy import select, update
 from sqlalchemy.orm import InstrumentedAttribute
 
 from app.helpers import identificador_generator
-from app.models.ticket import Ticket, TicketTareaRelacion
+from app.models.area import Area
+from app.models.ticket import Ticket, TicketHistorial, TicketTareaRelacion
 from app.repositories.base import BaseRepository
 from app.schemas.tarea import EEstadoTarea
 from app.schemas.ticket import (
     AddTareaTicketPayload,
+    CreateTicketHistorialPayload,
     CreateTicketPayload,
     EstadoTicket,
     ETicketField,
@@ -144,8 +146,7 @@ class TicketRepository(BaseRepository):
         ticket: TicketSchema = (
             await self.db.execute(
                 select(Ticket).where(
-                    Ticket.id == ticket_id,
-                    Ticket.fecha_eliminacion.is_(None)
+                    Ticket.id == ticket_id, Ticket.fecha_eliminacion.is_(None)
                 )
             )
         ).scalar_one_or_none()
@@ -163,8 +164,7 @@ class TicketRepository(BaseRepository):
         ticket: TicketSchema = (
             await self.db.execute(
                 select(Ticket).where(
-                    Ticket.id == ticket_id,
-                    Ticket.fecha_eliminacion.is_(None)
+                    Ticket.id == ticket_id, Ticket.fecha_eliminacion.is_(None)
                 )
             )
         ).scalar_one_or_none()
@@ -221,3 +221,28 @@ class TicketRepository(BaseRepository):
             await self.db.commit()
 
         return ticket_tarea.tarea_id if ticket_tarea else None
+
+    async def get_historial_by_ticket_id(self, ticket_id: int):
+        historial = (
+            await self.db.execute(
+                select(
+                    TicketHistorial.notas.label("mensaje"),
+                    Area.nombre.label("sector"),
+                    TicketHistorial.fecha_modificacion.label("fecha_modificacion"),
+                )
+                .join(Ticket, TicketHistorial.ticket_id == Ticket.id)
+                .join(Area, Ticket.area_asignada_id == Area.id)
+                .where(
+                    TicketHistorial.ticket_id == ticket_id,
+                )
+            )
+        ).all()
+
+        return historial
+
+    async def agregar_historial(self, payload: CreateTicketHistorialPayload):
+        historial = TicketHistorial(**payload.dict(exclude_none=True))
+        self.db.add(historial)
+        await self.db.commit()
+
+        return historial
