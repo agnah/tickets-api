@@ -101,7 +101,7 @@ async def update_ticket(
         )
 
     updated_ticket = await ticket_service.update_ticket(
-        ticket_id=ticket_id, payload=payload
+        ticket_id=ticket_id, payload=payload, usuario_id=usuario.id
     )
     if not updated_ticket:
         raise HTTPException(
@@ -128,7 +128,9 @@ async def anular_ticket(
             detail={"error": "Usuario no encontrado"},
         )
 
-    ticket = await ticket_service.anular_ticket(ticket_id=ticket_id)
+    ticket = await ticket_service.anular_ticket(
+        usuario_id=usuario.id, ticket_id=ticket_id
+    )
     if not ticket:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -155,7 +157,7 @@ async def cerrar_ticket(
         )
 
     ticket = await ticket_service.actualizar_estado_ticket(
-        ticket_id=ticket_id, estado=EstadoTicket.FINALIZADO
+        usuario_id=usuario.id, ticket_id=ticket_id, estado=EstadoTicket.FINALIZADO
     )
     if not ticket:
         raise HTTPException(
@@ -183,7 +185,9 @@ async def derivar_ticket(
             detail={"error": "Usuario no encontrado"},
         )
 
-    ticket = await ticket_service.derivar_ticket(ticket_id=ticket_id, area_id=area_id)
+    ticket = await ticket_service.derivar_ticket(
+        usuario_id=usuario.id, ticket_id=ticket_id, area_id=area_id
+    )
     if not ticket:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -305,7 +309,7 @@ async def finalizar_tarea(
         )
 
     ticket_tarea_relation = await ticket_service.finalizar_tarea(
-        ticket_id=ticket_id, tarea_id=tarea_id
+        usuario_id=usuario.id, ticket_id=ticket_id, tarea_id=tarea_id
     )
 
     return ticket_tarea_relation
@@ -337,7 +341,7 @@ async def eliminar_tarea(
         )
 
     tarea_eliminada_id = await ticket_service.eliminar_tarea(
-        ticket_id=ticket_id, tarea_id=tarea_id
+        usuario_id=usuario.id, ticket_id=ticket_id, tarea_id=tarea_id
     )
 
     if tarea_eliminada_id:

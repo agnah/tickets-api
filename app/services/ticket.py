@@ -91,9 +91,20 @@ class TicketService(ServiceLayer):
         # TBD: Deberiamos llamar a método para almacenar historial,
         # se creo el ticket con el estado inicial
 
+        if ticket:
+            await ticket_repo.agregar_historial(
+                payload=CreateTicketHistorialPayload(
+                    ticket_id=ticket.id,
+                    creado_por_id=1,  # TODO: Cambiar por usuario logueado
+                    notas="Se creo el ticket",
+                )
+            )
+
         return parse_obj_as(TicketSchema, ticket) if ticket else None
 
-    async def update_ticket(self, ticket_id: int, payload: UpdateTicketPayload):
+    async def update_ticket(
+        self, usuario_id: int, ticket_id: int, payload: UpdateTicketPayload
+    ):
         ticket_repo = TicketRepository(db=self.db)
 
         # TBD: Deberiamos llamar a método para almacenar historial,
@@ -102,6 +113,15 @@ class TicketService(ServiceLayer):
         ticket_id = await ticket_repo.update_ticket(
             ticket_id=ticket_id, payload=payload
         )
+
+        if ticket_id:
+            await ticket_repo.agregar_historial(
+                payload=CreateTicketHistorialPayload(
+                    ticket_id=ticket_id,
+                    creado_por_id=usuario_id,
+                    notas="Se actualizo el ticket",
+                )
+            )
 
         updated_ticket = await self.get_ticket_by_id(ticket_id=ticket_id)
 
@@ -113,16 +133,26 @@ class TicketService(ServiceLayer):
 
         return parse_obj_as(TicketSchema, ticket) if ticket else None
 
-    async def anular_ticket(self, ticket_id: int):
+    async def anular_ticket(self, usuario_id: int, ticket_id: int):
         repo = TicketRepository(db=self.db)
         ticket = await repo.anular_ticket_by_id(ticket_id=ticket_id)
 
         # TBD: Deberiamos llamar a método para almacenar historial,
         # para registrar que el ticket se anulo
+        if ticket:
+            await repo.agregar_historial(
+                payload=CreateTicketHistorialPayload(
+                    ticket_id=ticket_id,
+                    creado_por_id=usuario_id,  # TODO: Cambiar por usuario logueado
+                    notas="Se anulo el ticket",
+                )
+            )
 
         return parse_obj_as(TicketSchema, ticket) if ticket else None
 
-    async def actualizar_estado_ticket(self, ticket_id: int, estado: EstadoTicket):
+    async def actualizar_estado_ticket(
+        self, usuario_id: int, ticket_id: int, estado: EstadoTicket
+    ):
         repo = TicketRepository(db=self.db)
 
         # TBD: Deberiamos llamar a método para almacenar historial
@@ -130,15 +160,33 @@ class TicketService(ServiceLayer):
 
         ticket = await repo.actualizar_estado_ticket(ticket_id=ticket_id, estado=estado)
 
+        if ticket:
+            await repo.agregar_historial(
+                payload=CreateTicketHistorialPayload(
+                    ticket_id=ticket_id,
+                    creado_por_id=usuario_id,  # TODO: Cambiar por usuario logueado
+                    notas=f"Se cambio el estado del ticket a {estado}",
+                )
+            )
+
         return parse_obj_as(TicketSchema, ticket) if ticket else None
 
-    async def derivar_ticket(self, ticket_id: int, area_id: int):
+    async def derivar_ticket(self, usuario_id: int, ticket_id: int, area_id: int):
         repo = TicketRepository(db=self.db)
 
         # TBD: Deberiamos llamar a método para almacenar historial
         # para registrar que el ticket cambio de area
 
         ticket = await repo.derivar_ticket(ticket_id=ticket_id, area_id=area_id)
+
+        if ticket:
+            await repo.agregar_historial(
+                payload=CreateTicketHistorialPayload(
+                    ticket_id=ticket_id,
+                    creado_por_id=usuario_id,  # TODO: Cambiar por usuario logueado
+                    notas=f"Se derivó el ticket al area {area_id}",
+                )
+            )
 
         return parse_obj_as(TicketSchema, ticket) if ticket else None
 
@@ -157,6 +205,14 @@ class TicketService(ServiceLayer):
 
         if not ticket_tarea_relacion:
             return None
+        else:
+            await repo.agregar_historial(
+                payload=CreateTicketHistorialPayload(
+                    ticket_id=ticket.id,
+                    creado_por_id=1,  # TODO: Cambiar por usuario logueado
+                    notas=f"Se asigno la tarea '{tarea.id}'",
+                )
+            )
 
         ticket_tarea_relacion_data = parse_obj_as(
             TicketTareaSchema, ticket_tarea_relacion
@@ -166,7 +222,7 @@ class TicketService(ServiceLayer):
             **ticket_tarea_relacion_data.dict(), tarea=tarea
         )
 
-    async def finalizar_tarea(self, ticket_id: int, tarea_id: int):
+    async def finalizar_tarea(self, usuario_id: int, ticket_id: int, tarea_id: int):
         repo = TicketRepository(db=self.db)
 
         # TBD: Deberiamos llamar a método para almacenar historial
@@ -175,18 +231,36 @@ class TicketService(ServiceLayer):
             ticket_id=ticket_id, tarea_id=tarea_id
         )
 
+        if ticket_tarea_relacion:
+            await repo.agregar_historial(
+                payload=CreateTicketHistorialPayload(
+                    ticket_id=ticket_id,
+                    creado_por_id=1,  # TODO: Cambiar por usuario logueado
+                    notas=f"Se finalizo la tarea {tarea_id}",
+                )
+            )
+
         return (
             parse_obj_as(TicketTareaSchema, ticket_tarea_relacion)
             if ticket_tarea_relacion
             else None
         )
 
-    async def eliminar_tarea(self, ticket_id: int, tarea_id: int):
+    async def eliminar_tarea(self, usuario_id: int, ticket_id: int, tarea_id: int):
         repo = TicketRepository(db=self.db)
 
         # TBD: Deberiamos llamar a método para almacenar historial
         # para registrar que el ticket se elimino y no perder este registro!
         tarea_id = await repo.eliminar_tarea(ticket_id=ticket_id, tarea_id=tarea_id)
+
+        if tarea_id:
+            await repo.agregar_historial(
+                payload=CreateTicketHistorialPayload(
+                    ticket_id=ticket_id,
+                    creado_por_id=usuario_id,  # TODO: Cambiar por usuario logueado
+                    notas=f"Se elimino la tarea {tarea_id}",
+                )
+            )
 
         return tarea_id if tarea_id else None
 
