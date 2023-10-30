@@ -229,12 +229,14 @@ class TicketRepository(BaseRepository):
                     TicketHistorial.notas.label("mensaje"),
                     Area.nombre.label("sector"),
                     TicketHistorial.fecha_modificacion.label("fecha_modificacion"),
+                    TicketHistorial.fecha_creacion.label("fecha_creacion"),
                 )
                 .join(Ticket, TicketHistorial.ticket_id == Ticket.id)
                 .join(Area, Ticket.area_asignada_id == Area.id)
                 .where(
                     TicketHistorial.ticket_id == ticket_id,
                 )
+                .order_by(TicketHistorial.fecha_creacion.desc())
             )
         ).all()
 

@@ -174,6 +174,7 @@ class TicketHistorialResponse(BaseModel):
     mensaje: str
 
     fecha_modificacion: datetime
+    fecha_creacion: datetime
 
     class Config:
         orm_mode = True
