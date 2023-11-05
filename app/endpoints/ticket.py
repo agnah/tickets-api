@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import Optional
 
 from fastapi import APIRouter, Depends, Header, HTTPException, status
+from fastapi.encoders import jsonable_encoder
 from pydantic import Required
 
 from app.dependencies.service import (
@@ -66,6 +67,49 @@ async def get_tickets_by_field(
 
     tickets = await tickets_service.get_tickets_by_field_in_date_range(
         field=field, value=value, start_date=start_date, end_date=end_date
+    )
+
+    enriched_tickets = await tickets_service.enriching_tickets(tickets=tickets)
+
+    return enriched_tickets
+
+
+@router.get("/busqueda-avanzada/")
+async def get_tickets_busqueda_avanzada(
+    token: str = Header(Required, alias="X-Token"),
+    field: ETicketField = ETicketField.ID,
+    value: str = None,
+    start_date: datetime = None,
+    end_date: datetime = None,
+    area_solicitante: str = None,
+    email_solicitante: str = None,
+    descripcion: str = None,
+    nombre_solicitante: str = None,
+    usuario_service: UsuarioService = Depends(get_usuario_service),
+    tickets_service: TicketService = Depends(get_ticket_service),
+):
+    user = await usuario_service.get_user_by_field(field=EUSerField.TOKEN, value=token)
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"error": "Usuario no encontrado"},
+        )
+
+    filters = {
+        "start_date": start_date,
+        "end_date": end_date,
+        "area_solicitante": area_solicitante,
+        "email_solicitante": email_solicitante,
+        "descripcion": descripcion,
+        "nombre_solicitante": nombre_solicitante,
+    }
+
+    # Elimino los filtros que no tienen valor
+    filters = {k: v for k, v in filters.items() if v is not None}
+
+    tickets = await tickets_service.get_tickets_busqueda_avanzada(
+        field=field, value=value, filters=filters
     )
 
     enriched_tickets = await tickets_service.enriching_tickets(tickets=tickets)
@@ -345,7 +389,13 @@ async def eliminar_tarea(
     )
 
     if tarea_eliminada_id:
-        return f"La tarea con id={tarea_eliminada_id} ha sido eliminada del ticket con id={ticket_id}."
+        return jsonable_encoder(
+            {
+                "tarea_id": tarea_eliminada_id,
+                "ticket_id": ticket_id,
+                "detail": f"La tarea con id={tarea_eliminada_id} ha sido eliminada del ticket con id={ticket_id}.",
+            }
+        )
     else:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

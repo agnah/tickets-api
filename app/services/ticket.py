@@ -74,6 +74,19 @@ class TicketService(ServiceLayer):
 
         return parse_obj_as(list[TicketSchema], tickets) if tickets else []
 
+    async def get_tickets_busqueda_avanzada(
+        self,
+        field: ETicketField = None,
+        value: str = None,
+        filters: dict = None,
+    ):
+        repo = TicketRepository(db=self.db)
+        tickets = await repo.get_tickets_busqueda_avanzada(
+            field=field, value=value, filters=filters
+        )
+
+        return parse_obj_as(list[TicketSchema], tickets) if tickets else []
+
     async def get_tareas_by_ticket_id(self, ticket_id: int):
         ticket_repo = TicketRepository(db=self.db)
         tareas = await ticket_repo.get_tareas_by_ticket_id(ticket_id=ticket_id)

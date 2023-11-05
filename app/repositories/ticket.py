@@ -74,6 +74,40 @@ class TicketRepository(BaseRepository):
 
         return tickets
 
+    async def get_tickets_busqueda_avanzada(
+        self,
+        field: ETicketField = None,
+        value: str = None,
+        filters: dict = None,
+    ) -> list[TicketSchema]:
+        query = select(Ticket)
+
+        if field and value:
+            column: InstrumentedAttribute = getattr(Ticket, field)
+            query = query.where(column == value)
+
+        for key, value in filters.items():
+            if key == "start_date":
+                query = query.where(Ticket.fecha_creacion >= value)
+            elif key == "end_date":
+                query = query.where(Ticket.fecha_creacion <= value)
+            elif key == "area_solicitante":
+                query = query.where(Ticket.area_solicitante.like(f"%{value}%"))
+            elif key == "email_solicitante":
+                query = query.where(Ticket.email_solicitante.like(f"%{value}%"))
+            elif key == "descripcion":
+                query = query.where(Ticket.descripcion.like(f"%{value}%"))
+            elif key == "nombre_solicitante":
+                query = query.where(Ticket.nombre_solicitante.like(f"%{value}%"))
+
+        tickets: list[TicketSchema] = (
+            (await self.db.execute(query.order_by(Ticket.prioridad.asc())))
+            .scalars()
+            .all()
+        )
+
+        return tickets
+
     async def get_tareas_by_ticket_id(self, ticket_id: int) -> list[TicketTareaSchema]:
         tareas: list[TicketTareaSchema] = (
             (
@@ -93,7 +127,7 @@ class TicketRepository(BaseRepository):
     async def create_new_ticket(self, payload: CreateTicketPayload, prefix: str):
         new_ticket = Ticket(
             identificador=identificador_generator.generate_custom_identificador(prefix),
-            **payload.dict(exclude_none=True)
+            **payload.dict(exclude_none=True),
         )
         self.db.add(new_ticket)
         await self.db.commit()
