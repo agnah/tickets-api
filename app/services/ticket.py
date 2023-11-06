@@ -264,9 +264,11 @@ class TicketService(ServiceLayer):
 
         # TBD: Deberiamos llamar a método para almacenar historial
         # para registrar que el ticket se elimino y no perder este registro!
-        tarea_id = await repo.eliminar_tarea(ticket_id=ticket_id, tarea_id=tarea_id)
+        ticket_tarea_id = await repo.eliminar_tarea(
+            ticket_id=ticket_id, tarea_id=tarea_id
+        )
 
-        if tarea_id:
+        if ticket_tarea_id:
             await repo.agregar_historial(
                 payload=CreateTicketHistorialPayload(
                     ticket_id=ticket_id,
@@ -275,7 +277,7 @@ class TicketService(ServiceLayer):
                 )
             )
 
-        return tarea_id if tarea_id else None
+        return ticket_tarea_id if ticket_tarea_id else None
 
     async def get_historial_by_ticket_id(self, ticket_id: int):
         repo = TicketRepository(db=self.db)

@@ -254,7 +254,7 @@ class TicketRepository(BaseRepository):
             await self.db.delete(ticket_tarea)
             await self.db.commit()
 
-        return ticket_tarea.tarea_id if ticket_tarea else None
+        return ticket_tarea.id if ticket_tarea else None
 
     async def get_historial_by_ticket_id(self, ticket_id: int):
         historial = (

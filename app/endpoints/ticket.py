@@ -384,16 +384,15 @@ async def eliminar_tarea(
             detail={"error": "Ticket no encontrado"},
         )
 
-    tarea_eliminada_id = await ticket_service.eliminar_tarea(
+    ticket_tarea_id = await ticket_service.eliminar_tarea(
         usuario_id=usuario.id, ticket_id=ticket_id, tarea_id=tarea_id
     )
 
-    if tarea_eliminada_id:
+    if ticket_tarea_id:
         return jsonable_encoder(
             {
-                "tarea_id": tarea_eliminada_id,
-                "ticket_id": ticket_id,
-                "detail": f"La tarea con id={tarea_eliminada_id} ha sido eliminada del ticket con id={ticket_id}.",
+                "ticket_tarea_id": ticket_tarea_id,
+                "detail": f"La tarea con id={tarea_id} ha sido eliminada del ticket con id={ticket_id}.",
             }
         )
     else:
