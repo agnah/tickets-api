@@ -5,11 +5,13 @@ from sqlalchemy import select, update
 from sqlalchemy.orm import InstrumentedAttribute
 
 from app.helpers import identificador_generator
-from app.models.ticket import Ticket, TicketTareaRelacion
+from app.models.area import Area
+from app.models.ticket import Ticket, TicketHistorial, TicketTareaRelacion
 from app.repositories.base import BaseRepository
 from app.schemas.tarea import EEstadoTarea
 from app.schemas.ticket import (
     AddTareaTicketPayload,
+    CreateTicketHistorialPayload,
     CreateTicketPayload,
     EstadoTicket,
     ETicketField,
@@ -72,6 +74,36 @@ class TicketRepository(BaseRepository):
 
         return tickets
 
+    async def get_tickets_busqueda_avanzada(
+        self,
+        filters: dict = None,
+    ) -> list[TicketSchema]:
+        query = select(Ticket)
+
+        for key, value in filters.items():
+            if key == "start_date":
+                query = query.where(Ticket.fecha_creacion >= value)
+            elif key == "end_date":
+                query = query.where(Ticket.fecha_creacion <= value)
+            elif key == "identificador":
+                query = query.where(Ticket.identificador.like(f"%{value}%"))
+            elif key == "area_solicitante":
+                query = query.where(Ticket.area_solicitante.like(f"%{value}%"))
+            elif key == "email_solicitante":
+                query = query.where(Ticket.email_solicitante.like(f"%{value}%"))
+            elif key == "descripcion":
+                query = query.where(Ticket.descripcion.like(f"%{value}%"))
+            elif key == "nombre_solicitante":
+                query = query.where(Ticket.nombre_solicitante.like(f"%{value}%"))
+
+        tickets: list[TicketSchema] = (
+            (await self.db.execute(query.order_by(Ticket.prioridad.asc())))
+            .scalars()
+            .all()
+        )
+
+        return tickets
+
     async def get_tareas_by_ticket_id(self, ticket_id: int) -> list[TicketTareaSchema]:
         tareas: list[TicketTareaSchema] = (
             (
@@ -91,7 +123,7 @@ class TicketRepository(BaseRepository):
     async def create_new_ticket(self, payload: CreateTicketPayload, prefix: str):
         new_ticket = Ticket(
             identificador=identificador_generator.generate_custom_identificador(prefix),
-            **payload.dict(exclude_none=True)
+            **payload.dict(exclude_none=True),
         )
         self.db.add(new_ticket)
         await self.db.commit()
@@ -144,8 +176,7 @@ class TicketRepository(BaseRepository):
         ticket: TicketSchema = (
             await self.db.execute(
                 select(Ticket).where(
-                    Ticket.id == ticket_id,
-                    Ticket.fecha_eliminacion.is_(None)
+                    Ticket.id == ticket_id, Ticket.fecha_eliminacion.is_(None)
                 )
             )
         ).scalar_one_or_none()
@@ -163,8 +194,7 @@ class TicketRepository(BaseRepository):
         ticket: TicketSchema = (
             await self.db.execute(
                 select(Ticket).where(
-                    Ticket.id == ticket_id,
-                    Ticket.fecha_eliminacion.is_(None)
+                    Ticket.id == ticket_id, Ticket.fecha_eliminacion.is_(None)
                 )
             )
         ).scalar_one_or_none()
@@ -192,6 +222,7 @@ class TicketRepository(BaseRepository):
                     TicketTareaRelacion.ticket_id == ticket_id,
                     TicketTareaRelacion.tarea_id == tarea_id,
                     TicketTareaRelacion.fecha_eliminacion.is_(None),
+                    TicketTareaRelacion.estado != EEstadoTarea.FINALIZADA,
                 )
             )
         ).scalar_one_or_none()
@@ -220,4 +251,31 @@ class TicketRepository(BaseRepository):
             await self.db.delete(ticket_tarea)
             await self.db.commit()
 
-        return ticket_tarea.tarea_id if ticket_tarea else None
+        return ticket_tarea.id if ticket_tarea else None
+
+    async def get_historial_by_ticket_id(self, ticket_id: int):
+        historial = (
+            await self.db.execute(
+                select(
+                    TicketHistorial.notas.label("mensaje"),
+                    Area.nombre.label("sector"),
+                    TicketHistorial.fecha_modificacion.label("fecha_modificacion"),
+                    TicketHistorial.fecha_creacion.label("fecha_creacion"),
+                )
+                .join(Ticket, TicketHistorial.ticket_id == Ticket.id)
+                .join(Area, Ticket.area_asignada_id == Area.id)
+                .where(
+                    TicketHistorial.ticket_id == ticket_id,
+                )
+                .order_by(TicketHistorial.fecha_creacion.desc())
+            )
+        ).all()
+
+        return historial
+
+    async def agregar_historial(self, payload: CreateTicketHistorialPayload):
+        historial = TicketHistorial(**payload.dict(exclude_none=True))
+        self.db.add(historial)
+        await self.db.commit()
+
+        return historial
