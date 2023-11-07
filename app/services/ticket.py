@@ -181,24 +181,28 @@ class TicketService(ServiceLayer):
 
         return parse_obj_as(TicketSchema, ticket) if ticket else None
 
-    async def derivar_ticket(self, usuario_id: int, ticket_id: int, area_id: int):
+    async def derivar_ticket(self, usuario_id: int, ticket: TicketSchema, area_id: int):
         repo = TicketRepository(db=self.db)
 
         # TBD: Deberiamos llamar a método para almacenar historial
         # para registrar que el ticket cambio de area
 
-        ticket = await repo.derivar_ticket(ticket_id=ticket_id, area_id=area_id)
+        ticket_derivado = await repo.derivar_ticket(
+            ticket_id=ticket.id, area_id=area_id
+        )
 
-        if ticket:
+        if ticket_derivado:
             await repo.agregar_historial(
                 payload=CreateTicketHistorialPayload(
-                    ticket_id=ticket_id,
+                    ticket_id=ticket.id,
+                    area_anterior_id=ticket.area_asignada_id,
+                    tecnico_anterior_id=ticket.tecnico_asignado_id,
                     creado_por_id=usuario_id,  # TODO: Cambiar por usuario logueado
-                    notas=f"Se derivó el ticket al area {area_id}",
+                    notas=f"Se derivó el ticket del area {ticket.area_asignada_id} al area {area_id}",
                 )
             )
 
-        return parse_obj_as(TicketSchema, ticket) if ticket else None
+        return parse_obj_as(TicketSchema, ticket_derivado) if ticket_derivado else None
 
     async def agregar_tarea(self, ticket: TicketSchema, tarea: TareaAreaSchema):
         repo = TicketRepository(db=self.db)

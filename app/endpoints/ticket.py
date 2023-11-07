@@ -227,16 +227,25 @@ async def derivar_ticket(
             detail={"error": "Usuario no encontrado"},
         )
 
-    ticket = await ticket_service.derivar_ticket(
-        usuario_id=usuario.id, ticket_id=ticket_id, area_id=area_id
-    )
+    ticket = await ticket_service.get_ticket_by_id(ticket_id=ticket_id)
+
     if not ticket:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail={"error": "Ticket no encontrado"},
         )
 
-    return ticket
+    ticket_derivado = await ticket_service.derivar_ticket(
+        usuario_id=usuario.id, ticket=ticket, area_id=area_id
+    )
+
+    if not ticket_derivado:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"error": "No se pudo derivar el ticket"},
+        )
+
+    return ticket_derivado
 
 
 @router.post("/{ticket_id}/tareas/")
