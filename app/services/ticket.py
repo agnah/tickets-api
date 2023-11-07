@@ -4,6 +4,7 @@ from pydantic import parse_obj_as
 
 from app.repositories.ticket import TicketRepository
 from app.schemas.area import EAreaField, TareaAreaSchema
+from app.schemas.tarea import EEstadoTarea
 from app.schemas.ticket import (
     AddTareaTicketPayload,
     CreateTicketHistorialPayload,
@@ -76,14 +77,10 @@ class TicketService(ServiceLayer):
 
     async def get_tickets_busqueda_avanzada(
         self,
-        field: ETicketField = None,
-        value: str = None,
         filters: dict = None,
     ):
         repo = TicketRepository(db=self.db)
-        tickets = await repo.get_tickets_busqueda_avanzada(
-            field=field, value=value, filters=filters
-        )
+        tickets = await repo.get_tickets_busqueda_avanzada(filters=filters)
 
         return parse_obj_as(list[TicketSchema], tickets) if tickets else []
 
@@ -205,6 +202,22 @@ class TicketService(ServiceLayer):
 
     async def agregar_tarea(self, ticket: TicketSchema, tarea: TareaAreaSchema):
         repo = TicketRepository(db=self.db)
+
+        tareas_ticket = await self.get_tareas_by_ticket_id(ticket_id=ticket.id)
+
+        tarea_existente = next(
+            filter(
+                lambda tarea_ticket: (
+                    tarea_ticket.estado == EEstadoTarea.ACTIVA
+                    and tarea_ticket.tarea_id == tarea.id
+                ),
+                tareas_ticket,
+            ),
+            None,
+        )
+
+        if tarea_existente:
+            return None
 
         # TBD: Deberiamos llamar a método para almacenar historial
         # para registrar que al ticket se le asigno una tarea

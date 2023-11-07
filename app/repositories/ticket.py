@@ -76,21 +76,17 @@ class TicketRepository(BaseRepository):
 
     async def get_tickets_busqueda_avanzada(
         self,
-        field: ETicketField = None,
-        value: str = None,
         filters: dict = None,
     ) -> list[TicketSchema]:
         query = select(Ticket)
-
-        if field and value:
-            column: InstrumentedAttribute = getattr(Ticket, field)
-            query = query.where(column == value)
 
         for key, value in filters.items():
             if key == "start_date":
                 query = query.where(Ticket.fecha_creacion >= value)
             elif key == "end_date":
                 query = query.where(Ticket.fecha_creacion <= value)
+            elif key == "identificador":
+                query = query.where(Ticket.identificador.like(f"%{value}%"))
             elif key == "area_solicitante":
                 query = query.where(Ticket.area_solicitante.like(f"%{value}%"))
             elif key == "email_solicitante":
@@ -226,6 +222,7 @@ class TicketRepository(BaseRepository):
                     TicketTareaRelacion.ticket_id == ticket_id,
                     TicketTareaRelacion.tarea_id == tarea_id,
                     TicketTareaRelacion.fecha_eliminacion.is_(None),
+                    TicketTareaRelacion.estado != EEstadoTarea.FINALIZADA,
                 )
             )
         ).scalar_one_or_none()

@@ -77,10 +77,9 @@ async def get_tickets_by_field(
 @router.get("/busqueda-avanzada/")
 async def get_tickets_busqueda_avanzada(
     token: str = Header(Required, alias="X-Token"),
-    field: ETicketField = ETicketField.ID,
-    value: str = None,
     start_date: datetime = None,
     end_date: datetime = None,
+    identificador: str = None,
     area_solicitante: str = None,
     email_solicitante: str = None,
     descripcion: str = None,
@@ -99,6 +98,7 @@ async def get_tickets_busqueda_avanzada(
     filters = {
         "start_date": start_date,
         "end_date": end_date,
+        "identificador": identificador,
         "area_solicitante": area_solicitante,
         "email_solicitante": email_solicitante,
         "descripcion": descripcion,
@@ -108,9 +108,7 @@ async def get_tickets_busqueda_avanzada(
     # Elimino los filtros que no tienen valor
     filters = {k: v for k, v in filters.items() if v is not None}
 
-    tickets = await tickets_service.get_tickets_busqueda_avanzada(
-        field=field, value=value, filters=filters
-    )
+    tickets = await tickets_service.get_tickets_busqueda_avanzada(filters=filters)
 
     enriched_tickets = await tickets_service.enriching_tickets(tickets=tickets)
 
@@ -274,6 +272,14 @@ async def agregar_tarea(
         )
     """
 
+    if not ticket.tecnico_asignado_id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={
+                "error": "No se puede agregar tareas a un ticket sin tecnico asignado"
+            },
+        )
+
     area_tareas = await area_service.get_all_tareas_by_area_id(
         area_id=ticket.area_asignada_id
     )
@@ -296,6 +302,14 @@ async def agregar_tarea(
     ticket_tarea_relation = await ticket_service.agregar_tarea(
         ticket=ticket, tarea=tarea_a_agregar
     )
+
+    if not ticket_tarea_relation:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={
+                "error": "No se agrego la tarea al ticket o la tarea ya existe en el ticket"
+            },
+        )
 
     return ticket_tarea_relation
 
