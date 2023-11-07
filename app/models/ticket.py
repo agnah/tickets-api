@@ -1,10 +1,10 @@
-from sqlalchemy import Boolean, Column, Enum, DateTime, ForeignKey, String, Text
+from sqlalchemy import Column, Enum, DateTime, ForeignKey, String, Text
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
-from app.schemas.area import EPreTareas
-from app.schemas.tarea import EEstadoTarea
 
-from app.schemas.ticket import PrioridadTicket, EstadoTicket
+from app.schemas.area import AreasSolicitante, EPreTareas
+from app.schemas.tarea import EEstadoTarea
+from app.schemas.ticket import ESede, PrioridadTicket, EstadoTicket
 
 
 from .base import Base, UnsignedInt
@@ -15,27 +15,29 @@ class Ticket(Base):
     __mapper_args__ = {"eager_defaults": True}
 
     id = Column(UnsignedInt, autoincrement=True, primary_key=True)
+    identificador = Column(String(256), nullable=False, unique=True, default="identificador_temporal")
 
-    email_solicitante = Column(String(256), nullable=True)
+    email_solicitante = Column(String(256), nullable=False)
     nombre_solicitante = Column(String(256), nullable=True)
-    apellido_solicitante = Column(String(256), nullable=True)
     telefono_solicitante = Column(String(256), nullable=True)
     celular_solicitante = Column(String(256), nullable=True)
-    area_solicitante = Column(UnsignedInt, ForeignKey("area.id"), nullable=True)
-    # sede_solicitante = Column(Enum(ESede))  # TODO: Completar una vez que nos pasen los datos
+    area_solicitante = Column(Enum(AreasSolicitante), nullable=False, default=AreasSolicitante.ADMINISTRACION)
+
+    # TODO: Completar una vez que nos pasen los datos
+    sede_solicitante = Column(Enum(ESede), nullable=False, default=ESede.NUEVE_DE_JULIO)
     piso_solicitante = Column(String(256), nullable=True)
 
-    referencia = Column(String(256), nullable=True)
+    referencia = Column(String(256), nullable=True, default=None)
     area_asignada_id = Column(UnsignedInt, ForeignKey("area.id"), nullable=False)
-    tecnico_asignado_id = Column(UnsignedInt, ForeignKey("usuario.id"), nullable=False)
+    tecnico_asignado_id = Column(UnsignedInt, ForeignKey("usuario.id"), nullable=True, default=None)
 
     prioridad = Column(Enum(PrioridadTicket), nullable=False,
                        default=PrioridadTicket.BAJA)
     estado = Column(Enum(EstadoTicket), nullable=False, default=EstadoTicket.PENDIENTE)
 
-    descripcion = Column(Text(1048576), nullable=False)  # 1MiB
+    descripcion = Column(Text(1048576), nullable=True)  # 1MiB
 
-    pre_tarea = Column(Enum(EPreTareas), nullable=False)
+    pre_tarea = Column(Enum(EPreTareas), nullable=True, default=None)
 
     archivos = Column(String(256), nullable=True)
 
@@ -51,9 +53,7 @@ class TicketTareaRelacion(Base):
 
     id = Column(UnsignedInt, autoincrement=True, primary_key=True)
     ticket_id = Column(UnsignedInt, ForeignKey("ticket.id"), nullable=False)
-    area_id = Column(UnsignedInt, ForeignKey("area.id"), nullable=False)
-
-    tarea = Column(Enum(EPreTareas), nullable=False)
+    tarea_id = Column(UnsignedInt, ForeignKey("tarea_area_relacion.id"), nullable=False)
 
     tecnico_id = Column(UnsignedInt, ForeignKey("usuario.id"), nullable=False)
 
@@ -65,7 +65,7 @@ class TicketTareaRelacion(Base):
     fecha_eliminacion = Column(DateTime, default=None)
 
     ticket = relationship("Ticket")
-    area = relationship("Area")
+    tecnico = relationship("Usuario")
 
 
 class TicketHistorial(Base):
@@ -87,3 +87,7 @@ class TicketHistorial(Base):
     fecha_creacion = Column(DateTime, server_default=func.now())
     fecha_modificacion = Column(
         DateTime, server_default=func.now(), server_onupdate=func.now())
+
+    ticket = relationship("Ticket")
+    area_anterior = relationship("Area", foreign_keys=[area_anterior_id])
+    tecnico_anterior = relationship("Usuario", foreign_keys=[tecnico_anterior_id])

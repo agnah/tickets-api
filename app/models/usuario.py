@@ -1,6 +1,7 @@
 from sqlalchemy import Boolean, Column, Enum, DateTime, ForeignKey, String, Text
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
+from app.schemas.ticket import ESede
 
 from app.schemas.usuario import PerfilUsuario, RolUsuario
 
@@ -13,16 +14,18 @@ class Usuario(Base):
     __mapper_args__ = {"eager_defaults": True}
 
     id = Column(UnsignedInt, autoincrement=True, primary_key=True)
+    token = Column(String(256), nullable=False)
 
-    nombre = Column(String(256))
-    apellido = Column(String(256))
+    nombre = Column(String(256), nullable=False)
+    apellido = Column(String(256), nullable=False)
     email = Column(String(256), nullable=False)
     celular = Column(String(256), nullable=True)
     telefono = Column(String(256), nullable=True)
-    interno = Column(String(256))
+    interno = Column(String(256), nullable=True)
 
     area_id = Column(UnsignedInt, ForeignKey("area.id"))
-    # sede = Column(Enum(ESede)) # TODO: Completar una vez que nos pasen los datos
+    # TODO: Completar una vez que nos pasen los datos
+    sede = Column(Enum(ESede), nullable=False, default=ESede.NUEVE_DE_JULIO)
     piso = Column(String(256), nullable=True)
 
     perfil = Column(Enum(PerfilUsuario))
@@ -32,6 +35,5 @@ class Usuario(Base):
     fecha_modificacion = Column(
         DateTime, server_default=func.now(), server_onupdate=func.now())
     fecha_eliminacion = Column(DateTime, default=None)
-
 
     area = relationship("Area")
