@@ -118,9 +118,12 @@ async def get_tickets_busqueda_avanzada(
 @router.post("/")
 async def create_new_ticket(
     payload: CreateTicketPayload,
+    usuario_id: int = Header(Required, alias="X-Usuario"),
     ticket_service: TicketService = Depends(get_ticket_service),
 ) -> Optional[TicketSchema]:
-    ticket = await ticket_service.create_new_ticket(payload=payload)
+    ticket = await ticket_service.create_new_ticket(
+        payload=payload, usuario_id=usuario_id
+    )
 
     return ticket
 
@@ -309,7 +312,7 @@ async def agregar_tarea(
         )
 
     ticket_tarea_relation = await ticket_service.agregar_tarea(
-        ticket=ticket, tarea=tarea_a_agregar
+        ticket=ticket, tarea=tarea_a_agregar, usuario_id=usuario.id
     )
 
     if not ticket_tarea_relation:
