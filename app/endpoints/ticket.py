@@ -7,6 +7,7 @@ from pydantic import Required
 
 from app.dependencies.service import (
     get_area_service,
+    get_tarea_service,
     get_ticket_service,
     get_usuario_service,
 )
@@ -22,6 +23,7 @@ from app.schemas.ticket import (
 )
 from app.schemas.usuario import EUSerField
 from app.services.area import AreaService
+from app.services.tarea import TareaService
 from app.services.ticket import TicketService
 from app.services.usuario import UsuarioService
 
@@ -146,7 +148,7 @@ async def update_ticket(
         )
 
     updated_ticket = await ticket_service.update_ticket(
-        ticket_id=ticket_id, payload=payload, usuario_id=usuario.id
+        ticket_id=ticket_id, payload=payload, usuario=usuario
     )
     if not updated_ticket:
         raise HTTPException(
@@ -258,7 +260,7 @@ async def agregar_tarea(
     usuario_id: int = Header(Required, alias="X-Usuario"),
     ticket_service: TicketService = Depends(get_ticket_service),
     usuario_service: UsuarioService = Depends(get_usuario_service),
-    area_service: AreaService = Depends(get_area_service),
+    tarea_service: TareaService = Depends(get_tarea_service),
 ) -> Optional[TicketTareaSchema]:
     usuario = await usuario_service.get_user_by_field(
         field=EUSerField.ID, value=usuario_id
@@ -292,7 +294,7 @@ async def agregar_tarea(
             },
         )
 
-    area_tareas = await area_service.get_all_tareas_by_area_id(
+    area_tareas = await tarea_service.get_tareas_by_area_id(
         area_id=ticket.area_asignada_id
     )
     tarea_a_agregar = next(

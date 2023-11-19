@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from typing import Optional
 
 from attr import define
 from sqlalchemy import select, update
@@ -272,6 +273,21 @@ class TicketRepository(BaseRepository):
         ).all()
 
         return historial
+
+    async def get_last_history_by_ticket_id(self, ticket_id: int) -> Optional[TicketHistorial]:
+        last_history = (
+            await self.db.execute(
+                select(TicketHistorial, Area.nombre.label("sector"))
+            )
+            .join(Ticket, TicketHistorial.ticket_id == Ticket.id)
+            .join(Area, Ticket.area_asignada_id == Area.id)
+            .where(
+                TicketHistorial.ticket_id == ticket_id,
+            )
+            .order_by(TicketHistorial.fecha_creacion.desc())
+        ).first()
+
+        return last_history
 
     async def agregar_historial(self, payload: CreateTicketHistorialPayload):
         historial = TicketHistorial(**payload.dict(exclude_none=True))

@@ -34,36 +34,3 @@ class AreaRepository(BaseRepository):
         ).scalar_one_or_none()
 
         return area
-
-    async def get_area_tareas_by_ids(self, area_id: int, tareas_ids: list[int]):
-        tareas: list[TareaAreaRelacion] = (
-            (
-                await self.db.execute(
-                    select(TareaAreaRelacion).where(
-                        TareaAreaRelacion.area_id == area_id,
-                        TareaAreaRelacion.tarea_id.in_(tareas_ids),
-                        TareaAreaRelacion.fecha_eliminacion.is_(None),
-                    )
-                )
-            )
-            .scalars()
-            .all()
-        )
-
-        return tareas
-
-    async def get_all_tareas_by_area_id(self, area_id: int):
-        tareas: list[TareaAreaRelacion] = (
-            (
-                await self.db.execute(
-                    select(TareaAreaRelacion).where(
-                        TareaAreaRelacion.area_id == area_id,
-                        TareaAreaRelacion.fecha_eliminacion.is_(None),
-                    )
-                )
-            )
-            .scalars()
-            .all()
-        )
-
-        return tareas

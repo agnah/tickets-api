@@ -18,8 +18,9 @@ from app.schemas.ticket import (
     TicketTareaSchema,
     UpdateTicketPayload,
 )
-from app.schemas.usuario import EUSerField
+from app.schemas.usuario import EUSerField, UsuarioSchema
 from app.services.area import AreaService
+from app.services.tarea import TareaService
 from app.services.usuario import UsuarioService
 
 from .layer import ServiceLayer, register_service
@@ -103,14 +104,13 @@ class TicketService(ServiceLayer):
         prefix = area.nombre[0:3].upper()
 
         ticket = await ticket_repo.create_new_ticket(payload=payload, prefix=prefix)
-        # TBD: Deberiamos llamar a método para almacenar historial,
-        # se creo el ticket con el estado inicial
 
         if ticket:
+            # Se guarda el ticket con el estado inicial
             await ticket_repo.agregar_historial(
                 payload=CreateTicketHistorialPayload(
                     ticket_id=ticket.id,
-                    creado_por_id=usuario.id,  # TODO: Cambiar por usuario logueado
+                    creado_por_id=usuario.id,
                     notas=f"{usuario.nombre.capitalize()} {usuario.apellido.capitalize()} creo el ticket",
                 )
             )
@@ -118,27 +118,20 @@ class TicketService(ServiceLayer):
         return parse_obj_as(TicketSchema, ticket) if ticket else None
 
     async def update_ticket(
-        self, usuario_id: int, ticket_id: int, payload: UpdateTicketPayload
+        self, usuario: UsuarioSchema, ticket_id: int, payload: UpdateTicketPayload
     ):
         ticket_repo = TicketRepository(db=self.db)
-
-        usuario_service: UsuarioService = self.get_service("Usuario")
-        usuario = await usuario_service.get_user_by_field(
-            field=EUSerField.ID, value=usuario_id
-        )
-
-        # TBD: Deberiamos llamar a método para almacenar historial,
-        # para almacenar que campos se actualizaron y con que valores en el ticket
 
         ticket_id = await ticket_repo.update_ticket(
             ticket_id=ticket_id, payload=payload
         )
 
+        # Almacenando en historial informacion de los campos que se actualizaron
         if ticket_id:
             await ticket_repo.agregar_historial(
                 payload=CreateTicketHistorialPayload(
                     ticket_id=ticket_id,
-                    creado_por_id=usuario_id,
+                    creado_por_id=usuario.id,
                     notas=f"{usuario.nombre.capitalize()} {usuario.apellido.capitalize()} actualizó el ticket",
                 )
             )
@@ -162,9 +155,8 @@ class TicketService(ServiceLayer):
             field=EUSerField.ID, value=usuario_id
         )
 
-        # TBD: Deberiamos llamar a método para almacenar historial,
-        # para registrar que el ticket se anulo
         if ticket:
+            # Registrando que el ticket se anulo
             await repo.agregar_historial(
                 payload=CreateTicketHistorialPayload(
                     ticket_id=ticket_id,
@@ -185,12 +177,10 @@ class TicketService(ServiceLayer):
             field=EUSerField.ID, value=usuario_id
         )
 
-        # TBD: Deberiamos llamar a método para almacenar historial
-        # para registrar que el ticket cambio de estado
-
         ticket = await repo.actualizar_estado_ticket(ticket_id=ticket_id, estado=estado)
 
         if ticket:
+            # Registrando que el ticket cambio de estado
             await repo.agregar_historial(
                 payload=CreateTicketHistorialPayload(
                     ticket_id=ticket_id,
@@ -215,14 +205,12 @@ class TicketService(ServiceLayer):
         )
         area_nueva = await area_service.get_area_by_id(area_id=area_id)
 
-        # TBD: Deberiamos llamar a método para almacenar historial
-        # para registrar que el ticket cambio de area
-
         ticket_derivado = await repo.derivar_ticket(
             ticket_id=ticket.id, area_id=area_id
         )
 
         if ticket_derivado:
+            # Registrando que el ticket cambio de area
             await repo.agregar_historial(
                 payload=CreateTicketHistorialPayload(
                     ticket_id=ticket.id,
@@ -241,6 +229,7 @@ class TicketService(ServiceLayer):
         repo = TicketRepository(db=self.db)
 
         usuario_service: UsuarioService = self.get_service("Usuario")
+
         usuario = await usuario_service.get_user_by_field(
             field=EUSerField.ID, value=usuario_id
         )
@@ -261,8 +250,6 @@ class TicketService(ServiceLayer):
         if tarea_existente:
             return None
 
-        # TBD: Deberiamos llamar a método para almacenar historial
-        # para registrar que al ticket se le asigno una tarea
         payload = AddTareaTicketPayload(
             ticket_id=ticket.id,
             tarea_id=tarea.id,
@@ -274,11 +261,12 @@ class TicketService(ServiceLayer):
         if not ticket_tarea_relacion:
             return None
         else:
+            # Registrando que al ticket se le asigno una tarea
             await repo.agregar_historial(
                 payload=CreateTicketHistorialPayload(
                     ticket_id=ticket.id,
-                    creado_por_id=usuario.id,  # TODO: Cambiar por usuario logueado
-                    notas=f"{usuario.nombre.capitalize()} {usuario.apellido.capitalize()} asigno la tarea '{tarea.tarea}'",
+                    creado_por_id=usuario.id,
+                    notas=f"{usuario.nombre.capitalize()} {usuario.apellido.capitalize()} asigno la tarea '{tarea.tarea}' al ticket",
                 )
             )
 
@@ -298,17 +286,16 @@ class TicketService(ServiceLayer):
             field=EUSerField.ID, value=usuario_id
         )
 
-        # TBD: Deberiamos llamar a método para almacenar historial
-        # para registrar que el ticket finalizo
         ticket_tarea_relacion = await repo.finalizar_tarea(
             ticket_id=ticket_id, tarea_id=tarea_id
         )
 
         if ticket_tarea_relacion:
+            # Registrando que el ticket finalizo
             await repo.agregar_historial(
                 payload=CreateTicketHistorialPayload(
                     ticket_id=ticket_id,
-                    creado_por_id=usuario_id,  # TODO: Cambiar por usuario logueado
+                    creado_por_id=usuario_id,
                     notas=f"{usuario.nombre.capitalize()} {usuario.apellido.capitalize()} finalizó la tarea {tarea_id}",
                 )
             )
@@ -327,17 +314,16 @@ class TicketService(ServiceLayer):
             field=EUSerField.ID, value=usuario_id
         )
 
-        # TBD: Deberiamos llamar a método para almacenar historial
-        # para registrar que el ticket se elimino y no perder este registro!
         ticket_tarea_id = await repo.eliminar_tarea(
             ticket_id=ticket_id, tarea_id=tarea_id
         )
 
         if ticket_tarea_id:
+            # Registrando que la tarea se elimino del ticket y no perder este registro
             await repo.agregar_historial(
                 payload=CreateTicketHistorialPayload(
                     ticket_id=ticket_id,
-                    creado_por_id=usuario_id,  # TODO: Cambiar por usuario logueado
+                    creado_por_id=usuario_id,
                     notas=f"{usuario.nombre.capitalize()} {usuario.apellido.capitalize()} eliminó la tarea {tarea_id}",
                 )
             )

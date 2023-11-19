@@ -5,6 +5,7 @@ from fastapi import Depends
 from app.models import SessionLocal as TicketsSessionLocal
 from app.services.area import AreaService
 from app.services.layer import ServiceLayer
+from app.services.tarea import TareaService
 from app.services.ticket import TicketService
 from app.services.usuario import UsuarioService
 
@@ -38,3 +39,8 @@ def get_usuario_service(
     usuario_service: UsuarioService = Depends(get_service(UsuarioService)),
 ) -> UsuarioService:
     return usuario_service
+
+def get_tarea_service(
+    tarea_service: TareaService = Depends(get_service(TareaService)),
+) -> TareaService:
+    return tarea_service
