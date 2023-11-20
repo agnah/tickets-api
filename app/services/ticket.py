@@ -9,6 +9,7 @@ from app.schemas.ticket import (
     AddTareaTicketPayload,
     CreateTicketHistorialPayload,
     CreateTicketPayload,
+    ETipoPedido,
     EnrichedTicketSchema,
     EnrichedTicketTareaSchema,
     EstadoTicket,
@@ -91,13 +92,14 @@ class TicketService(ServiceLayer):
 
         return parse_obj_as(list[TicketTareaSchema], tareas) if tareas else []
 
-    async def create_new_ticket(self, payload: CreateTicketPayload, usuario: UsuarioSchema):
+    async def create_new_ticket(self, tipo: ETipoPedido, payload: CreateTicketPayload, usuario: UsuarioSchema):
         ticket_repo = TicketRepository(db=self.db)
         area_service: AreaService = self.get_service("Area")
 
         area = await area_service.get_area_by_id(area_id=payload.area_asignada_id)
 
-        prefix = area.nombre[0:3].upper()
+        # prefix = area.nombre[0:3].upper()
+        prefix = tipo.value
 
         ticket = await ticket_repo.create_new_ticket(payload=payload, prefix=prefix)
 

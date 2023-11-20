@@ -6,7 +6,6 @@ from fastapi.encoders import jsonable_encoder
 from pydantic import Required
 
 from app.dependencies.service import (
-    get_area_service,
     get_tarea_service,
     get_ticket_service,
     get_usuario_service,
@@ -20,6 +19,7 @@ from app.schemas.ticket import (
     TicketSchema,
     TicketTareaSchema,
     UpdateTicketPayload,
+    ETipoPedido,
 )
 from app.schemas.usuario import EUSerField
 from app.services.area import AreaService
@@ -120,6 +120,7 @@ async def get_tickets_busqueda_avanzada(
 @router.post("/")
 async def create_new_ticket(
     payload: CreateTicketPayload,
+    tipo: ETipoPedido = Header(Required, alias="X-Tipo"),
     usuario_id: int = Header(Required, alias="X-Usuario"),
     ticket_service: TicketService = Depends(get_ticket_service),
     usuario_service: UsuarioService = Depends(get_usuario_service),
@@ -135,7 +136,7 @@ async def create_new_ticket(
         )
 
     ticket = await ticket_service.create_new_ticket(
-        payload=payload, usuario=usuario
+        payload=payload, usuario=usuario, tipo=tipo
     )
 
     return ticket

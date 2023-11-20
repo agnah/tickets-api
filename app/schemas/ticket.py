@@ -7,6 +7,9 @@ from pydantic import BaseModel
 from app.schemas.area import AreaSchema, AreasSolicitante, TareaAreaSchema
 from app.schemas.usuario import UsuarioSchema
 
+class ETipoPedido(str, Enum):
+    TICKET = "TI"
+    TRAMITE = "TR"
 
 class ETicketField(str, Enum):
     ID = "id"
