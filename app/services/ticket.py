@@ -91,15 +91,11 @@ class TicketService(ServiceLayer):
 
         return parse_obj_as(list[TicketTareaSchema], tareas) if tareas else []
 
-    async def create_new_ticket(self, payload: CreateTicketPayload, usuario_id: int):
+    async def create_new_ticket(self, payload: CreateTicketPayload, usuario: UsuarioSchema):
         ticket_repo = TicketRepository(db=self.db)
         area_service: AreaService = self.get_service("Area")
-        usuario_service: UsuarioService = self.get_service("Usuario")
 
         area = await area_service.get_area_by_id(area_id=payload.area_asignada_id)
-        usuario = await usuario_service.get_user_by_field(
-            field=EUSerField.ID, value=usuario_id
-        )
 
         prefix = area.nombre[0:3].upper()
 
@@ -146,21 +142,16 @@ class TicketService(ServiceLayer):
 
         return parse_obj_as(TicketSchema, ticket) if ticket else None
 
-    async def anular_ticket(self, usuario_id: int, ticket_id: int):
+    async def anular_ticket(self, usuario: UsuarioSchema, ticket_id: int):
         repo = TicketRepository(db=self.db)
         ticket = await repo.anular_ticket_by_id(ticket_id=ticket_id)
-
-        usuario_service: UsuarioService = self.get_service("Usuario")
-        usuario = await usuario_service.get_user_by_field(
-            field=EUSerField.ID, value=usuario_id
-        )
 
         if ticket:
             # Registrando que el ticket se anulo
             await repo.agregar_historial(
                 payload=CreateTicketHistorialPayload(
                     ticket_id=ticket_id,
-                    creado_por_id=usuario_id,  # TODO: Cambiar por usuario logueado
+                    creado_por_id=usuario.id,
                     notas=f"{usuario.nombre.capitalize()} {usuario.apellido.capitalize()} anuló el ticket",
                 )
             )
@@ -168,14 +159,9 @@ class TicketService(ServiceLayer):
         return parse_obj_as(TicketSchema, ticket) if ticket else None
 
     async def actualizar_estado_ticket(
-        self, usuario_id: int, ticket_id: int, estado: EstadoTicket
+        self, usuario: UsuarioSchema, ticket_id: int, estado: EstadoTicket
     ):
         repo = TicketRepository(db=self.db)
-
-        usuario_service: UsuarioService = self.get_service("Usuario")
-        usuario = await usuario_service.get_user_by_field(
-            field=EUSerField.ID, value=usuario_id
-        )
 
         ticket = await repo.actualizar_estado_ticket(ticket_id=ticket_id, estado=estado)
 
@@ -184,22 +170,17 @@ class TicketService(ServiceLayer):
             await repo.agregar_historial(
                 payload=CreateTicketHistorialPayload(
                     ticket_id=ticket_id,
-                    creado_por_id=usuario_id,  # TODO: Cambiar por usuario logueado
+                    creado_por_id=usuario.id,
                     notas=f"{usuario.nombre.capitalize()} {usuario.apellido.capitalize()} cambio el estado del ticket a {estado}",
                 )
             )
 
         return parse_obj_as(TicketSchema, ticket) if ticket else None
 
-    async def derivar_ticket(self, usuario_id: int, ticket: TicketSchema, area_id: int):
+    async def derivar_ticket(self, usuario: UsuarioSchema, ticket: TicketSchema, area_id: int):
         repo = TicketRepository(db=self.db)
 
         area_service: AreaService = self.get_service("Area")
-        usuario_service: UsuarioService = self.get_service("Usuario")
-
-        usuario = await usuario_service.get_user_by_field(
-            field=EUSerField.ID, value=usuario_id
-        )
         area_anterior = await area_service.get_area_by_id(
             area_id=ticket.area_asignada_id
         )
@@ -216,7 +197,7 @@ class TicketService(ServiceLayer):
                     ticket_id=ticket.id,
                     area_anterior_id=ticket.area_asignada_id,
                     tecnico_anterior_id=ticket.tecnico_asignado_id,
-                    creado_por_id=usuario_id,  # TODO: Cambiar por usuario logueado
+                    creado_por_id=usuario.id,
                     notas=f"{usuario.nombre.capitalize()} {usuario.apellido.capitalize()} derivó el ticket del area {area_anterior.nombre} al area {area_nueva.nombre}",
                 )
             )
@@ -224,15 +205,9 @@ class TicketService(ServiceLayer):
         return parse_obj_as(TicketSchema, ticket_derivado) if ticket_derivado else None
 
     async def agregar_tarea(
-        self, ticket: TicketSchema, tarea: TareaAreaSchema, usuario_id: int
+        self, ticket: TicketSchema, tarea: TareaAreaSchema, usuario: UsuarioSchema
     ):
         repo = TicketRepository(db=self.db)
-
-        usuario_service: UsuarioService = self.get_service("Usuario")
-
-        usuario = await usuario_service.get_user_by_field(
-            field=EUSerField.ID, value=usuario_id
-        )
 
         tareas_ticket = await self.get_tareas_by_ticket_id(ticket_id=ticket.id)
 
@@ -278,13 +253,8 @@ class TicketService(ServiceLayer):
             **ticket_tarea_relacion_data.dict(), tarea=tarea
         )
 
-    async def finalizar_tarea(self, usuario_id: int, ticket_id: int, tarea_id: int):
+    async def finalizar_tarea(self, usuario: UsuarioSchema, ticket_id: int, tarea_id: int):
         repo = TicketRepository(db=self.db)
-
-        usuario_service: UsuarioService = self.get_service("Usuario")
-        usuario = await usuario_service.get_user_by_field(
-            field=EUSerField.ID, value=usuario_id
-        )
 
         ticket_tarea_relacion = await repo.finalizar_tarea(
             ticket_id=ticket_id, tarea_id=tarea_id
@@ -295,7 +265,7 @@ class TicketService(ServiceLayer):
             await repo.agregar_historial(
                 payload=CreateTicketHistorialPayload(
                     ticket_id=ticket_id,
-                    creado_por_id=usuario_id,
+                    creado_por_id=usuario.id,
                     notas=f"{usuario.nombre.capitalize()} {usuario.apellido.capitalize()} finalizó la tarea {tarea_id}",
                 )
             )
@@ -306,13 +276,8 @@ class TicketService(ServiceLayer):
             else None
         )
 
-    async def eliminar_tarea(self, usuario_id: int, ticket_id: int, tarea_id: int):
+    async def eliminar_tarea(self, usuario: UsuarioSchema, ticket_id: int, tarea_id: int):
         repo = TicketRepository(db=self.db)
-
-        usuario_service: UsuarioService = self.get_service("Usuario")
-        usuario = await usuario_service.get_user_by_field(
-            field=EUSerField.ID, value=usuario_id
-        )
 
         ticket_tarea_id = await repo.eliminar_tarea(
             ticket_id=ticket_id, tarea_id=tarea_id
@@ -323,7 +288,7 @@ class TicketService(ServiceLayer):
             await repo.agregar_historial(
                 payload=CreateTicketHistorialPayload(
                     ticket_id=ticket_id,
-                    creado_por_id=usuario_id,
+                    creado_por_id=usuario.id,
                     notas=f"{usuario.nombre.capitalize()} {usuario.apellido.capitalize()} eliminó la tarea {tarea_id}",
                 )
             )
