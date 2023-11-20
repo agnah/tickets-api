@@ -31,20 +31,20 @@ router = APIRouter()
 
 
 @router.get("/inicio/")
-async def get_last_ten_days_tickets_by_user(
+async def get_unfinished_tickets_by_user(
     token: str = Header(Required, alias="X-Token"),
     usuario_service: UsuarioService = Depends(get_usuario_service),
     tickets_service: TicketService = Depends(get_ticket_service),
 ) -> list[EnrichedTicketSchema]:
-    user = await usuario_service.get_user_by_field(field=EUSerField.TOKEN, value=token)
+    usuario = await usuario_service.get_user_by_field(field=EUSerField.TOKEN, value=token)
 
-    if not user:
+    if not usuario:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail={"error": "Usuario no encontrado"},
         )
 
-    tickets = await tickets_service.get_last_ten_days_tickets()
+    tickets = await tickets_service.get_unfinished_tickets()
     enriched_tickets = await tickets_service.enriching_tickets(tickets=tickets)
     return enriched_tickets
 

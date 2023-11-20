@@ -28,13 +28,13 @@ class TicketRepository(BaseRepository):
     Repository to handle CRUD operations on Ticket model
     """
 
-    async def get_last_ten_days_tickets(self) -> list[TicketSchema]:
+    async def get_unfinished_tickets(self) -> list[TicketSchema]:
         tickets: list[TicketSchema] = (
             (
                 await self.db.execute(
                     select(Ticket)
                     .where(
-                        Ticket.fecha_creacion >= datetime.now() - timedelta(days=10),
+                        Ticket.estado.not_in([EstadoTicket.FINALIZADO, EstadoTicket.ANULADO]),
                     )
                     .order_by(Ticket.prioridad.asc())
                 )

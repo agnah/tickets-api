@@ -8,8 +8,8 @@ from app.schemas.area import AreaSchema, AreasSolicitante, TareaAreaSchema
 from app.schemas.usuario import UsuarioSchema
 
 class ETipoPedido(str, Enum):
-    TICKET = "TI"
-    TRAMITE = "TR"
+    TICKET = "TICKET"
+    TRAMITE = "TRAMITE"
 
 class ETicketField(str, Enum):
     ID = "id"

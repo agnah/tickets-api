@@ -29,9 +29,9 @@ from .layer import ServiceLayer, register_service
 
 @register_service("Ticket")
 class TicketService(ServiceLayer):
-    async def get_last_ten_days_tickets(self):
+    async def get_unfinished_tickets(self):
         repo = TicketRepository(db=self.db)
-        tickets = await repo.get_last_ten_days_tickets()
+        tickets = await repo.get_unfinished_tickets()
 
         for ticket in tickets:
             if datetime.now() > (ticket.fecha_creacion + timedelta(days=3)):
@@ -99,7 +99,7 @@ class TicketService(ServiceLayer):
         area = await area_service.get_area_by_id(area_id=payload.area_asignada_id)
 
         # prefix = area.nombre[0:3].upper()
-        prefix = tipo.value
+        prefix = tipo.value[0:2]
 
         ticket = await ticket_repo.create_new_ticket(payload=payload, prefix=prefix)
 
