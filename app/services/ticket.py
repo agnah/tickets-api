@@ -9,11 +9,11 @@ from app.schemas.ticket import (
     AddTareaTicketPayload,
     CreateTicketHistorialPayload,
     CreateTicketPayload,
-    ETipoPedido,
     EnrichedTicketSchema,
     EnrichedTicketTareaSchema,
     EstadoTicket,
     ETicketField,
+    ETipoPedido,
     TicketHistorialResponse,
     TicketSchema,
     TicketTareaSchema,
@@ -92,11 +92,13 @@ class TicketService(ServiceLayer):
 
         return parse_obj_as(list[TicketTareaSchema], tareas) if tareas else []
 
-    async def create_new_ticket(self, tipo: ETipoPedido, payload: CreateTicketPayload, usuario: UsuarioSchema):
+    async def create_new_ticket(
+        self, tipo: ETipoPedido, payload: CreateTicketPayload, usuario: UsuarioSchema
+    ):
         ticket_repo = TicketRepository(db=self.db)
-        area_service: AreaService = self.get_service("Area")
+        # area_service: AreaService = self.get_service("Area")
 
-        area = await area_service.get_area_by_id(area_id=payload.area_asignada_id)
+        # area = await area_service.get_area_by_id(area_id=payload.area_asignada_id)
 
         # prefix = area.nombre[0:3].upper()
         prefix = tipo.value[0:2]
@@ -179,7 +181,9 @@ class TicketService(ServiceLayer):
 
         return parse_obj_as(TicketSchema, ticket) if ticket else None
 
-    async def derivar_ticket(self, usuario: UsuarioSchema, ticket: TicketSchema, area_id: int):
+    async def derivar_ticket(
+        self, usuario: UsuarioSchema, ticket: TicketSchema, area_id: int
+    ):
         repo = TicketRepository(db=self.db)
 
         area_service: AreaService = self.get_service("Area")
@@ -255,8 +259,13 @@ class TicketService(ServiceLayer):
             **ticket_tarea_relacion_data.dict(), tarea=tarea
         )
 
-    async def finalizar_tarea(self, usuario: UsuarioSchema, ticket_id: int, tarea_id: int):
+    async def finalizar_tarea(
+        self, usuario: UsuarioSchema, ticket_id: int, tarea_id: int
+    ):
         repo = TicketRepository(db=self.db)
+        service_tarea: TareaService = self.get_service("Tarea")
+
+        tarea = service_tarea.get_tarea_by_id(tarea_id=tarea_id)
 
         ticket_tarea_relacion = await repo.finalizar_tarea(
             ticket_id=ticket_id, tarea_id=tarea_id
@@ -268,7 +277,7 @@ class TicketService(ServiceLayer):
                 payload=CreateTicketHistorialPayload(
                     ticket_id=ticket_id,
                     creado_por_id=usuario.id,
-                    notas=f"{usuario.nombre.capitalize()} {usuario.apellido.capitalize()} finalizó la tarea {tarea_id}",
+                    notas=f"{usuario.nombre.capitalize()} {usuario.apellido.capitalize()} finalizó la tarea {tarea.tarea}",
                 )
             )
 
@@ -278,8 +287,13 @@ class TicketService(ServiceLayer):
             else None
         )
 
-    async def eliminar_tarea(self, usuario: UsuarioSchema, ticket_id: int, tarea_id: int):
+    async def eliminar_tarea(
+        self, usuario: UsuarioSchema, ticket_id: int, tarea_id: int
+    ):
         repo = TicketRepository(db=self.db)
+        service_tarea: TareaService = self.get_service("Tarea")
+
+        tarea = service_tarea.get_tarea_by_id(tarea_id=tarea_id)
 
         ticket_tarea_id = await repo.eliminar_tarea(
             ticket_id=ticket_id, tarea_id=tarea_id
@@ -291,7 +305,7 @@ class TicketService(ServiceLayer):
                 payload=CreateTicketHistorialPayload(
                     ticket_id=ticket_id,
                     creado_por_id=usuario.id,
-                    notas=f"{usuario.nombre.capitalize()} {usuario.apellido.capitalize()} eliminó la tarea {tarea_id}",
+                    notas=f"{usuario.nombre.capitalize()} {usuario.apellido.capitalize()} eliminó la tarea {tarea.tarea}",
                 )
             )
 
