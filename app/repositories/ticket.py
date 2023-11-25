@@ -34,7 +34,8 @@ class TicketRepository(BaseRepository):
                 await self.db.execute(
                     select(Ticket)
                     .where(
-                        Ticket.estado.not_in([EstadoTicket.FINALIZADO, EstadoTicket.ANULADO]),
+                        Ticket.estado.not_in(
+                            [EstadoTicket.FINALIZADO, EstadoTicket.ANULADO]),
                     )
                     .order_by(Ticket.prioridad.asc())
                 )
@@ -268,7 +269,7 @@ class TicketRepository(BaseRepository):
                 .where(
                     TicketHistorial.ticket_id == ticket_id,
                 )
-                .order_by(TicketHistorial.fecha_creacion.desc())
+                .order_by(TicketHistorial.fecha_creacion.asc())
             )
         ).all()
 
