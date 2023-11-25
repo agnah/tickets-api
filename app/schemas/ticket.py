@@ -45,6 +45,8 @@ class EstadoTicket(str, Enum):
 
 
 class CreateTicketPayload(BaseModel):
+    nro_gde: str = None
+
     email_solicitante: str
     nombre_solicitante: str = None
     telefono_solicitante: str = None
@@ -69,6 +71,8 @@ class CreateTicketPayload(BaseModel):
 
 
 class UpdateTicketPayload(BaseModel):
+    nro_gde: str = None
+
     nombre_solicitante: str = None
     telefono_solicitante: str = None
     celular_solicitante: str = None
@@ -120,6 +124,8 @@ class EnrichedTicketTareaSchema(TicketTareaSchema):
 class TicketSchema(BaseModel):
     id: int
     identificador: str
+
+    nro_gde: str = None
 
     email_solicitante: str
     nombre_solicitante: str = None
