@@ -293,7 +293,7 @@ class TicketService(ServiceLayer):
         repo = TicketRepository(db=self.db)
         service_tarea: TareaService = self.get_service("Tarea")
 
-        tarea = service_tarea.get_tarea_by_id(tarea_id=tarea_id)
+        tarea = await service_tarea.get_tarea_by_id(tarea_id=tarea_id)
 
         ticket_tarea_id = await repo.eliminar_tarea(
             ticket_id=ticket_id, tarea_id=tarea_id
