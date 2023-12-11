@@ -1,9 +1,13 @@
 
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from app.dependencies.service import get_area_service
+
+from app.dependencies.service import get_area_service, get_tarea_service
+
 from app.schemas.area import AreaSchema
+
 from app.services.area import AreaService
+from app.services.tarea import TareaService
 
 router = APIRouter()
 
@@ -30,7 +34,8 @@ async def get_area_by_id(
 @router.get("/tareas/{area_id}/")
 async def get_tareas_by_area_id(
     area_id: int,
-    area_service: AreaService = Depends(get_area_service)
+    area_service: AreaService = Depends(get_area_service),
+    tarea_service: TareaService = Depends(get_tarea_service)
 ) -> AreaSchema:
 
     area = await area_service.get_area_by_id(
@@ -43,7 +48,7 @@ async def get_tareas_by_area_id(
             detail={"error": "Area no encontrada"},
         )
 
-    tareas = await area_service.get_all_tareas_by_area_id(area_id=area_id)
+    tareas = await tarea_service.get_tareas_by_area_id(area_id=area_id)
 
     if not tareas:
         raise HTTPException(

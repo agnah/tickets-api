@@ -3,6 +3,7 @@ from .layer import ServiceLayer
 from .ticket import TicketService
 from .area import AreaService
 from .usuario import UsuarioService
+from .tarea import TareaService
 
 
 __all__ = [
@@ -10,5 +11,6 @@ __all__ = [
     "TicketService",
     "AreaService",
     "ServiceLayer",
-    "UsuarioService"
+    "UsuarioService",
+    "TareaService",
 ]

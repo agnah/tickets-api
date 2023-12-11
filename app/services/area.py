@@ -20,21 +20,8 @@ class AreaService(ServiceLayer):
 
         return parse_obj_as(AreaSchema, area) if area else None
 
-    async def get_area_tareas_by_ids(self, area_id: int, tareas_ids: list[int]
-                                     ) -> Optional[TareaAreaSchema]:
-        repo = AreaRepository(db=self.db)
-        tarea = await repo.get_area_tareas_by_ids(area_id=area_id, tareas_ids=tareas_ids)
-
-        return parse_obj_as(list[TareaAreaSchema], tarea) if tarea else None
-
     async def get_area_by_id(self, area_id: int) -> Optional[AreaResponse]:
         repo = AreaRepository(db=self.db)
         area = await repo.get_area_by_id(area_id=area_id)
 
         return parse_obj_as(AreaResponse, area) if area else None
-
-    async def get_all_tareas_by_area_id(self, area_id: int) -> list[TareaAreaSchema]:
-        repo = AreaRepository(db=self.db)
-        tareas = await repo.get_all_tareas_by_area_id(area_id=area_id)
-
-        return parse_obj_as(list[TareaAreaSchema], tareas) if tareas else []

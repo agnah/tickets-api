@@ -7,6 +7,9 @@ from pydantic import BaseModel
 from app.schemas.area import AreaSchema, AreasSolicitante, TareaAreaSchema
 from app.schemas.usuario import UsuarioSchema
 
+class ETipoPedido(str, Enum):
+    TICKET = "TICKET"
+    TRAMITE = "TRAMITE"
 
 class ETicketField(str, Enum):
     ID = "id"
@@ -42,6 +45,8 @@ class EstadoTicket(str, Enum):
 
 
 class CreateTicketPayload(BaseModel):
+    nro_gde: str = None
+
     email_solicitante: str
     nombre_solicitante: str = None
     telefono_solicitante: str = None
@@ -66,6 +71,8 @@ class CreateTicketPayload(BaseModel):
 
 
 class UpdateTicketPayload(BaseModel):
+    nro_gde: str = None
+
     nombre_solicitante: str = None
     telefono_solicitante: str = None
     celular_solicitante: str = None
@@ -117,6 +124,8 @@ class EnrichedTicketTareaSchema(TicketTareaSchema):
 class TicketSchema(BaseModel):
     id: int
     identificador: str
+
+    nro_gde: str = None
 
     email_solicitante: str
     nombre_solicitante: str = None
@@ -182,11 +191,11 @@ class TicketHistorialResponse(BaseModel):
 
 class CreateTicketHistorialPayload(BaseModel):
     ticket_id: int
+    creado_por_id: int
+    notas: str = None
     registro_anterior_id: int = None
     area_anterior_id: int = None
     tecnico_anterior_id: int = None
-    notas: str = None
-    creado_por_id: int
 
     class Config:
         orm_mode = True

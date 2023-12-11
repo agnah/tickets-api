@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from typing import Optional
 
 from attr import define
 from sqlalchemy import select, update
@@ -27,13 +28,14 @@ class TicketRepository(BaseRepository):
     Repository to handle CRUD operations on Ticket model
     """
 
-    async def get_last_ten_days_tickets(self) -> list[TicketSchema]:
+    async def get_unfinished_tickets(self) -> list[TicketSchema]:
         tickets: list[TicketSchema] = (
             (
                 await self.db.execute(
                     select(Ticket)
                     .where(
-                        Ticket.fecha_creacion >= datetime.now() - timedelta(days=10),
+                        Ticket.estado.not_in(
+                            [EstadoTicket.FINALIZADO, EstadoTicket.ANULADO]),
                     )
                     .order_by(Ticket.prioridad.asc())
                 )
@@ -267,11 +269,26 @@ class TicketRepository(BaseRepository):
                 .where(
                     TicketHistorial.ticket_id == ticket_id,
                 )
-                .order_by(TicketHistorial.fecha_creacion.desc())
+                .order_by(TicketHistorial.fecha_creacion.asc())
             )
         ).all()
 
         return historial
+
+    async def get_last_history_by_ticket_id(self, ticket_id: int) -> Optional[TicketHistorial]:
+        last_history = (
+            await self.db.execute(
+                select(TicketHistorial, Area.nombre.label("sector"))
+            )
+            .join(Ticket, TicketHistorial.ticket_id == Ticket.id)
+            .join(Area, Ticket.area_asignada_id == Area.id)
+            .where(
+                TicketHistorial.ticket_id == ticket_id,
+            )
+            .order_by(TicketHistorial.fecha_creacion.desc())
+        ).first()
+
+        return last_history
 
     async def agregar_historial(self, payload: CreateTicketHistorialPayload):
         historial = TicketHistorial(**payload.dict(exclude_none=True))

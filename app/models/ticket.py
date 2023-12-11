@@ -17,6 +17,8 @@ class Ticket(Base):
     id = Column(UnsignedInt, autoincrement=True, primary_key=True)
     identificador = Column(String(256), nullable=False, unique=True, default="identificador_temporal")
 
+    nro_gde = Column(String(256), nullable=True, default=None)
+
     email_solicitante = Column(String(256), nullable=False)
     nombre_solicitante = Column(String(256), nullable=True)
     telefono_solicitante = Column(String(256), nullable=True)
